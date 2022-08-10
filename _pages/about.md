@@ -18,7 +18,7 @@ by [Dr Jonathan Shapiro](http://www.cs.man.ac.uk/~jls/). My Erdős number is 3.
 
 ### 2022
 
-- July: I will be a lecturer at the [Italian Summer School of Geometric Deep Learning](https://www.sci.unich.it/geodeep2022/) alongside Michael Bronstein, Francesco Di Giovanni, Maurice Weiler, Pim de Haan. 
+- **July: I was a lecturer at the [First Italian Summer School of Geometric Deep Learning](https://www.sci.unich.it/geodeep2022/) alongside Michael Bronstein, Francesco Di Giovanni, Pim de Haan and Maurice Weiler. My lectures cover a large part of my upcoming PhD thesis on Topological Deep Learning and argue why topology should play a central role in GDL. The [recordings](https://www.youtube.com/playlist?list=PLn2-dEmQeTfRQXLKf9Fmlk3HmReGg3YZZ) and the [slides](https://www.sci.unich.it/geodeep2022/#schedule) are available online.**
 - July: I will be a mentoring a [research project on Sheaf Neural Networks](https://www.logml.ai/people/mentor22/cristian) at the [London Geometry and Machine Learning Summer School](https://www.logml.ai/). If you are interested to work with me on this topic, please apply on the summer school website. 
 - June: We wrote a blogpost about [Topological Message Passing](https://towardsdatascience.com/a-new-computational-fabric-for-graph-neural-networks-280ea7e3ed1a) and [Neural Sheaf Diffusion](https://towardsdatascience.com/neural-sheaf-diffusion-for-deep-learning-on-graphs-bfa200e6afa6) 
 - May: Famous ML YouTuber Aleksa Gordić made a [video explaining our Neural Sheaf Diffusion paper](https://www.youtube.com/watch?v=JiQmkhsbRwk) and including lots of nice intuitions of sheaf theory. 
