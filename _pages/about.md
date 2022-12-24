@@ -8,7 +8,7 @@ profile:
   align: right
   image: cris_profile.jpg
   image_circular: true # crops the image to make it circular
-  # address: >
+  address: 
     # <p>555 your office number</p>
     # <p>123 your address street</p>
     # <p>Your City, State 12345</p>
