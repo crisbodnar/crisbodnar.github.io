@@ -2,9 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Senior Researcher @ Microsoft Research. Previously @ Google Brain, Google X, Twitter Cortex.
-
-
+subtitle: Co-founder @ Silurian AI. Previously @ Google Brain, MSR, Twitter Cortex.
 
 profile:
   align: right
@@ -20,7 +18,8 @@ selected_papers: true # includes a list of papers marked as "selected={true}"
 social: false  # includes social icons at the bottom of the page
 ---
 
-Hi there! I am a Senior Researcher at Microsoft Research in the [AI4Science team](https://www.microsoft.com/en-us/research/lab/microsoft-research-ai4science/) where I am working at intersection of deep learning and partial differential equations (PDEs). On the ML side, my research spans a range of topics such as geometric & topological deep learning, graph neural networks and neural differential equations.
+I’m a cofounder of [Silurian AI](https://silurian.ai/), where we are building AI systems that can simulate and reason about the physical world. 
 
-Previously, I finished my PhD at the University of Cambridge, supervised by
-[Prof Pietro Liò](https://www.cl.cam.ac.uk/~pl219/) and supported by a [Microsoft Research PhD Fellowship](https://www.microsoft.com/en-us/research/academic-program/phd-fellowship/#!people) (2021). I've also spent significant time in industry as a research intern at Microsoft Research (2022), [Twitter Cortex](https://cortex.twitter.com/) (2021), Google Brain (2020), and as an AI Resident at [Google X](https://x.company/) (2019). In 2019, I graduated with distinction the MPhil in Advanced Computer Science at Cambridge with a Best MPhil Student Award. 
+Most recently, I was as a technical co-lead at Microsoft Research for the [Aurora foundation model](https://arxiv.org/abs/2405.13063)—the first foundation model for the Earth System. Aurora brings together high-resolution weather, atmospheric chemistry, waves, and hurricane dynamics under a single AI model.
+
+Before that, I completed my [PhD at the University of Cambridge](https://arxiv.org/abs/2206.00606), under the supervision of Prof. Pietro Liò and as a recipient of the Microsoft Research PhD Fellowship (2021). I’ve spent significant time in industry and research labs, including stints at Microsoft Research (2022), Twitter Cortex (2021), Google Brain (2020), and as an AI Resident at Google X (2019). Earlier, I graduated with distinction from Cambridge’s MPhil in Advanced Computer Science, earning the Best MPhil Student Award.
