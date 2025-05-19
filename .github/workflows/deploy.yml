@@ -20,10 +20,20 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.0.2'
+        bundler-version: '2.4.13'
         bundler-cache: true
-    - name: Install deps
-      run: |
-        npm install -g mermaid.cli
+      - name: Disable default gems
+        run: |
+          # Prevent Bundler from auto-activating Ruby’s built-in gems (like uri)
+          bundle config set disable_default_gems true
+
+      - name: Install Ruby dependencies
+        run: |
+          bundle install --jobs 4 --retry 3
+
+      - name: Install Node deps
+        run: |
+          npm install -g mermaid.cli
     - name: Setup deploy options
       id: setup
       run: |
