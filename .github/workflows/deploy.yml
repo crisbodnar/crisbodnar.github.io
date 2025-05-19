@@ -13,12 +13,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    # ensure Bundler never auto-loads Ruby’s built-in gems
-    env:
-      BUNDLE_DISABLE_DEFAULT_GEMS: "true"
-
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -26,24 +20,11 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.0.2'
+        bundler-version: "2.3.26"   # or “latest”
         bundler-cache: true
-        bundler-version: ''     # leave blank
-
-    - name: Remove old Bundler
+    - name: Install deps
       run: |
-        gem uninstall bundler -v '2.2.22' --executables --force || true
-
-    - name: Install modern Bundler
-      run: |
-        gem install bundler -v 2.4.13
-
-    - name: Configure Bundler
-      run: |
-        bundle _2.4.13_ config set disable_default_gems true
-
-    - name: Install Ruby dependencies
-      run: |
-        bundle _2.4.13_ install --jobs 4 --retry 3
+        npm install -g mermaid.cli
     - name: Setup deploy options
       id: setup
       run: |
