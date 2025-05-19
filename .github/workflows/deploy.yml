@@ -20,11 +20,15 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.0.2'
-        bundler: "2.3.26"      # or “latest”
+        bundler: "2.4.15"      # or “latest”
         bundler-cache: true
     - name: Install deps
       run: |
         npm install -g mermaid.cli
+    - name: Debug Bundler
+      run: |
+        which bundle
+        bundle -v
     - name: Setup deploy options
       id: setup
       run: |
