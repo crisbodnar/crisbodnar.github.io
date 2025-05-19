@@ -29,6 +29,10 @@ jobs:
         bundler-cache: true
         bundler-version: ''     # leave blank
 
+    - name: Remove old Bundler
+      run: |
+        gem uninstall bundler -v '2.2.22' --executables --force || true
+
     - name: Install modern Bundler
       run: |
         gem install bundler -v 2.4.13
