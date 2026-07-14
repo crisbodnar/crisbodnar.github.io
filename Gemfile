@@ -15,6 +15,7 @@ group :jekyll_plugins do
     gem 'jemoji'
     gem 'mini_racer'
     gem 'unicode_utils'
+    gem 'ostruct' # stdlib gem no longer bundled with Ruby >= 3.5; needed by jekyll-twitter-plugin
     gem 'webrick'
     gem 'uri', '0.10.1'
 end
