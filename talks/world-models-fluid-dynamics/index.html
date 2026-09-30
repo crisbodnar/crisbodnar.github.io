@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>World Models for Fluid Dynamics · Cristian Bodnar</title>
+<style>
+:root{--ink:#000;--paper:#eeece6;--white:#f3f2ed;--muted:#959b9d;--blue:#97cbe0;--line:#303536;font-family:Arial,Helvetica,sans-serif;color:var(--white);background:#111415}
+*{box-sizing:border-box}body{margin:0;overflow:hidden}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:5px}button:disabled{opacity:.25;cursor:default}
+#viewport{position:fixed;inset:0 0 66px;display:flex;align-items:center;justify-content:center;overflow:hidden}#stage{position:absolute;width:1600px;height:900px;transform-origin:center center;background:var(--ink);overflow:hidden}
+.slide{position:absolute;inset:0;overflow:hidden;background:var(--ink);visibility:hidden;opacity:0;transition:opacity .35s ease;pointer-events:none}.slide.active{visibility:visible;opacity:1;pointer-events:auto}.slide.paper{background:var(--paper);color:#171b1d}
+h1,h2,h3,p{margin:0}h1,h2,h3{font-weight:400;letter-spacing:-.045em}h1{font-size:92px;line-height:1.06}h2{font-size:66px;line-height:1.08}h3{font-size:38px;line-height:1.15}em{font-family:Georgia,'Times New Roman',serif;font-weight:400}p{line-height:1.4}.title{position:absolute;left:100px;top:85px;max-width:1360px}.title.small{font-size:54px}.blue{color:var(--blue)}.quiet{color:var(--muted)}.paper .quiet{color:#737978}.label{font-size:24px;letter-spacing:.005em}.micro{font-size:17px;line-height:1.4;color:var(--muted);letter-spacing:.005em}.credit{position:absolute;left:100px;bottom:36px;font-size:16px;color:#929899}.disclosure{position:absolute;right:72px;bottom:36px;font-size:16px;color:#8c9699}.paper .credit{color:#697477}
+.pos{position:absolute}.contain{object-fit:contain}.cover{object-fit:cover}.image{display:block}.bg{position:absolute;width:1600px;height:900px;object-fit:cover;left:0;top:0}.enter{opacity:0;transform:translateY(15px)}.active .enter{animation:arrive .65s .08s both}.active .delay{animation-delay:.2s}.active .delay2{animation-delay:.35s}@keyframes arrive{to{opacity:1;transform:translateY(0)}}
+.rule{height:1px;background:var(--line)}.paper .rule{background:#bdc4c4}.giant{font-size:132px;letter-spacing:-.06em;line-height:1.02}.math{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.025em}.math sub,.math sup{font-size:.5em}.eq{font-size:88px;line-height:1.35}.serif{font-family:Georgia,'Times New Roman',serif;font-style:italic;letter-spacing:-.04em}.text-center{text-align:center}.row{display:flex;align-items:center}.muted-line{color:#555f63}.arrow{font-size:58px;color:#65747a;font-weight:300}.figure{position:absolute;object-fit:contain}.frame{overflow:hidden;background:#080b0d}.frame img,.frame video{width:100%;height:100%;object-fit:cover}.frame video{display:block}.media-caption{display:flex;justify-content:space-between;align-items:baseline;margin-top:24px}.media-caption strong{font-size:34px;font-weight:400;letter-spacing:-.03em}.media-caption span{font-size:20px;color:var(--muted)}
+#toolbar{position:fixed;bottom:0;left:0;right:0;height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 25px;gap:20px;background:#111415;border-top:1px solid #292d2e;z-index:20;color:#a7adaf;font-size:12px}.tools{display:flex;align-items:center;gap:8px}.tool{border:0;border-radius:5px;background:transparent;color:#a7adaf;padding:9px 11px;white-space:nowrap;font-size:12px}.tool:hover,.tool.on{color:#f3f2ed;background:#252c2e}.tool kbd{margin-left:7px;color:#6f7f84;font-size:10px}.nav-arrow{font-size:20px;padding:5px 13px}.counter{min-width:67px;text-align:center;color:#d8ddde;font-variant-numeric:tabular-nums}.toolbar-name{color:#ddd;font-size:12px}.toolbar-section{color:#738287;margin-left:13px}.progress{position:fixed;bottom:65px;left:0;height:2px;width:0;background:var(--blue);z-index:30;transition:width .25s}
+#notes{position:fixed;right:18px;top:18px;bottom:85px;width:min(450px,calc(100vw - 36px));background:#151b1e;border:1px solid #3a464c;border-radius:8px;z-index:40;padding:30px;overflow:auto;box-shadow:0 12px 70px #0008}#notes[hidden],#overview[hidden],#help[hidden]{display:none}#notes h2{font-size:24px;line-height:1.2;letter-spacing:-.03em;margin:18px 0 22px}#notes p{font-size:15px;line-height:1.65;color:#c7ced1;margin:16px 0}#notes .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8eabb7}#notes a{color:var(--blue);font-size:13px;line-height:1.5;display:block;margin:10px 0;text-decoration:none}#notes a:hover{text-decoration:underline}.close{position:absolute;top:15px;right:15px;border:0;background:transparent;color:#b5c1c6;font-size:24px;padding:4px 9px}
+#overview{position:fixed;inset:0 0 66px;background:#111415f5;z-index:35;overflow:auto;padding:38px}.overview-title{font-size:25px;font-weight:400;margin:5px 0 30px;letter-spacing:-.03em}.thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:25px}.thumb{background:none;color:#c7ced1;border:0;padding:0;text-align:left}.thumb-stage{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:#000;border:1px solid #303b40}.thumb.current .thumb-stage{border:2px solid var(--blue)}.thumb .slide{display:block;visibility:visible;opacity:1;transform-origin:top left;pointer-events:none;width:1600px;height:900px}.thumb .enter{opacity:1;transform:none;animation:none}.thumb-caption{display:flex;gap:12px;font-size:12px;line-height:1.4;margin-top:10px}.thumb-num{color:#76929e;font-variant-numeric:tabular-nums}.thumb:hover .thumb-caption{color:white}
+#help{position:fixed;inset:0;z-index:60;background:#000b;display:grid;place-items:center}.help-card{background:#182125;border:1px solid #43545b;width:min(460px,90vw);padding:40px;position:relative}.help-card h2{font-size:28px;margin-bottom:25px;letter-spacing:-.025em}.shortcut{display:flex;justify-content:space-between;line-height:2.6;color:#ccd4d8;font-size:14px}.shortcut kbd{color:var(--blue)}.editing [data-edit]{outline:1px dashed #78afc2;outline-offset:8px;cursor:text}.editing [data-edit]:focus{outline:2px solid #aad7e6}#toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);padding:12px 20px;background:#26363e;color:#d7edf7;border:1px solid #597681;z-index:70;font-size:13px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .2s}#toast.show{opacity:1}
+body.fullscreen #toolbar{opacity:0;transition:opacity .2s}body.fullscreen #toolbar:hover,body.fullscreen #toolbar:focus-within{opacity:1}body.fullscreen #viewport{bottom:0}body.fullscreen .progress{bottom:0}body.fullscreen #notes{bottom:25px}.motion-paused *{animation-play-state:paused!important}.motion-paused .enter{animation:none!important;opacity:1;transform:none}
+@media(max-width:800px){#toolbar{padding:0 10px;gap:5px}.toolbar-name,.toolbar-section,.tool kbd{display:none}.tools{gap:1px}.tool{padding:9px 8px}.counter{min-width:55px}.optional{display:none}#overview{padding:22px}.thumb-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.enter{opacity:1;transform:none}}
+@media print{body{overflow:visible;background:#000}#viewport{position:static;display:block;overflow:visible}#stage{position:static;transform:none!important;width:auto;height:auto;overflow:visible}.slide{position:relative;width:1600px;height:900px;display:block!important;visibility:visible;opacity:1;break-after:page;page-break-after:always}.enter{opacity:1;transform:none}#toolbar,.progress,#notes,#overview,#help,#toast{display:none!important}@page{size:1600px 900px;margin:0}}
+
+.animation-frame[hidden]{display:none}.build{opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s}.build.shown{opacity:1;visibility:visible}.build-exit{opacity:1;transition:opacity .3s ease}.build-exit.removed{opacity:0;pointer-events:none}.thumb .build,.editing .build{opacity:1;visibility:visible}.thumb .build-exit,.editing .build-exit{display:none}#buildCount{font-size:10px;color:#97cbe0;white-space:nowrap;min-width:0}#buildCount:not(:empty){min-width:62px}.motion-paused .build,.motion-paused .build-exit{transition:none}
+@media print{.build{opacity:1;visibility:visible}.build-exit{display:none}}
+</style>
+</head>
+<body>
+<main id="viewport" aria-label="Presentation"><div id="stage">
+
+<section class="slide active" data-title="World Models for Fluid Dynamics" data-chapter="Opening">
+ <img class="bg" src="assets/aircraft.png" alt="Conceptual aircraft surrounded by airflow filaments" style="left:330px;width:1440px;opacity:.8">
+ <div class="pos row quiet enter" style="left:103px;right:100px;top:88px;justify-content:space-between;font-size:27px"><p data-edit data-edit-id="title-event">Physical Sciences and Engineering&nbsp; | &nbsp;AI+X</p><p data-edit data-edit-id="title-event-date-location">Zurich · Oct 1st</p></div>
+ <div class="pos enter" style="left:100px;top:232px;width:850px"><h1 data-edit data-edit-id="world-models-fluid-title">World models<br>for<br><em>fluid dynamics</em></h1></div>
+ <div class="pos enter delay" style="left:103px;top:730px"><p style="font-size:40px;line-height:1.2" data-edit data-edit-id="title-speaker-name">Cristian Bodnar</p><p class="quiet" style="font-size:27px;line-height:1.3;margin-top:13px" data-edit data-edit-id="title-speaker-affiliation">Project Prometheus</p></div>
+</section>
+
+
+
+<section class="slide" data-title="Worlds we can generate" data-chapter="World models">
+ <h2 class="title enter" data-edit data-edit-id="5">Worlds we can generate</h2>
+ <div class="pos enter delay" style="left:100px;top:248px;width:678px"><div class="frame" style="height:398px"><video preload="none" src="assets/sora-mammoth.mp4" poster="assets/sora.jpg" muted loop playsinline aria-label="Original Sora-generated video of woolly mammoths walking through snow"></video></div><div class="media-caption"><strong>Sora</strong><span>Video generation</span></div></div>
+ <div class="pos enter delay2" style="left:822px;top:248px;width:678px"><div class="frame" style="height:398px"><video preload="none" src="assets/cosmos.mp4" muted loop playsinline aria-label="Cosmos-Predict1 generated robot manipulation video"></video></div><div class="media-caption"><strong>Cosmos</strong><span>Physical AI</span></div></div>
+ <span class="credit">Sora (2024), OpenAI · Cosmos-Predict1 (2025), NVIDIA · Generated demonstrations</span>
+</section>
+
+<section class="slide" data-title="How much lift?" data-chapter="Engineering">
+ <img class="bg" src="assets/aircraft.png" alt="Illustrative aircraft with airflow" style="left:185px;width:1550px">
+ <h2 class="pos enter" style="left:100px;top:265px;width:580px;font-size:92px" data-edit data-edit-id="6">How much<br><em>lift?</em></h2>
+ <div class="pos enter delay" style="left:103px;top:646px"><p class="label blue" data-edit data-edit-id="7">Pressure. Shear. Forces.</p><p class="label quiet" style="margin-top:12px" data-edit data-edit-id="8">For this geometry, at this speed.</p></div>
+ <span class="disclosure">Conceptual illustration · no simulated values</span>
+</section>
+
+<section class="slide paper" data-title="Physics already gives us world models" data-chapter="The inference engine">
+ <h2 class="title enter" data-edit data-edit-id="physics-world-models-restored">Physics already gives us<br><em>world models</em></h2>
+ <div class="pos enter delay" style="left:100px;top:365px;width:1400px;text-align:center">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" style="font-size:78px" aria-label="Divergence of velocity equals zero"><mrow><mo>∇</mo><mo>·</mo><mi mathvariant="normal">𝒖</mi><mo>=</mo><mn>0</mn></mrow></math>
+ </div>
+ <div class="pos enter delay" style="left:100px;top:525px;width:1400px;text-align:center">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block" style="font-size:66px" aria-label="Density times the sum of the time derivative of velocity and advective acceleration equals negative pressure gradient plus dynamic viscosity times the Laplacian of velocity plus density times body acceleration">
+   <mrow><mi>ρ</mi><mo>(</mo><mfrac><mrow><mo>∂</mo><mi mathvariant="normal">𝒖</mi></mrow><mrow><mo>∂</mo><mi>t</mi></mrow></mfrac><mo>+</mo><mo stretchy="false">(</mo><mi mathvariant="normal">𝒖</mi><mo>·</mo><mo>∇</mo><mo stretchy="false">)</mo><mi mathvariant="normal">𝒖</mi><mo>)</mo><mo>=</mo><mo>−</mo><mo>∇</mo><mi>p</mi><mo>+</mo><mi>μ</mi><msup><mo>∇</mo><mn>2</mn></msup><mi mathvariant="normal">𝒖</mi><mo>+</mo><mi>ρ</mi><mi mathvariant="normal">𝒃</mi></mrow>
+  </math>
+ </div>
+</section>
+
+<section class="slide paper" data-title="Numerical simulations are the wrong inference engine" data-chapter="The inference engine">
+ <h2 class="title enter" data-edit data-edit-id="sim-reuse-title">Numerical simulations are<br><em>the wrong inference engine</em></h2>
+ <div class="pos quiet enter delay" style="left:100px;top:346px;font-size:25px" data-edit data-edit-id="sim-reusable">Reusable</div>
+ <p class="pos enter delay" style="left:335px;top:335px;font-size:36px" data-edit data-edit-id="sim-laws">Physical laws</p>
+ <span class="pos arrow enter delay" style="left:687px;top:336px" aria-hidden="true">→</span>
+ <span class="pos math enter delay" style="left:805px;top:310px;font-size:70px" aria-label="Governing equations F of u equals zero">F(u) = 0</span>
+ <p class="pos label quiet enter delay" style="left:1130px;top:349px" data-edit data-edit-id="sim-equations">The equations</p>
+ <span class="pos enter delay2" style="left:897px;top:441px;font-size:40px;color:#65747a" aria-hidden="true">↓</span>
+ <div class="pos quiet enter delay2" style="left:100px;top:566px;font-size:25px" data-edit data-edit-id="sim-each-case">Each case</div>
+ <span class="pos math enter delay2" style="left:393px;top:519px;font-size:100px">x</span>
+ <span class="pos arrow enter delay2" style="left:542px;top:550px" aria-hidden="true">→</span>
+ <img class="pos contain enter delay2" src="assets/airfoil-mesh.png" alt="Conceptual mesh prepared for a new geometry" style="left:590px;top:489px;width:285px;height:190px;mix-blend-mode:multiply;mask-image:radial-gradient(ellipse at center,#000 35%,transparent 71%)">
+ <span class="pos enter delay2" style="left:868px;top:563px;font-size:34px;color:#65747a" aria-hidden="true">→</span>
+ <span class="pos math enter delay2" style="left:924px;top:550px;font-size:47px">u<sub>0</sub> → ··· → u<sub>N</sub></span>
+ <span class="pos arrow enter delay2" style="left:1185px;top:550px" aria-hidden="true">→</span>
+ <span class="pos math enter delay2" style="left:1340px;top:519px;font-size:100px">y</span>
+ <p class="pos label quiet enter delay2" style="left:280px;top:700px;width:290px;text-align:center" data-edit data-edit-id="sim-new-case">New design</p>
+ <p class="pos label enter delay2" style="left:635px;top:700px;width:225px;text-align:center" data-edit data-edit-id="sim-mesh">Prepare mesh</p>
+ <p class="pos label enter delay2" style="left:918px;top:700px;width:240px;text-align:center" data-edit data-edit-id="sim-solve">Run simulation</p>
+ <p class="pos label quiet enter delay2" style="left:1250px;top:700px;width:230px;text-align:center" data-edit data-edit-id="sim-prediction">Prediction</p>
+ <div class="pos enter delay2" style="left:630px;top:750px;width:527px;border-top:1px solid #9da9ad;padding-top:17px;text-align:center;font-size:25px" data-edit data-edit-id="sim-repeat">This computation repeats</div>
+</section>
+
+<section class="slide" data-title="Distilling reality into neural networks" data-chapter="The inference engine">
+ <h2 class="title enter" data-edit data-edit-id="distill-title">Distilling reality into<br><em>neural networks</em></h2>
+ <div class="pos enter delay" style="left:100px;top:346px;font-size:25px;color:#959b9d" data-edit data-edit-id="distill-training-label">Training</div>
+ <p class="pos enter delay" style="left:335px;top:310px;font-size:36px;line-height:1.35" data-edit data-edit-id="distill-training-data">Observations<br>+ simulations</p>
+ <span class="pos arrow enter delay" style="left:687px;top:336px" aria-hidden="true">→</span>
+ <span class="pos math blue enter delay" style="left:862px;top:288px;font-size:108px" aria-label="Learned parameters theta">θ</span>
+ <p class="pos label quiet enter delay" style="left:1004px;top:349px" data-edit data-edit-id="distill-training-weights">Learned weights</p>
+ <span class="pos enter delay2" style="left:886px;top:441px;font-size:40px;color:#526a74" aria-hidden="true">↓</span>
+ <div class="pos enter delay2" style="left:100px;top:566px;font-size:25px;color:#959b9d" data-edit data-edit-id="distill-inference-label">Inference</div>
+ <span class="pos math enter delay2" style="left:393px;top:519px;font-size:100px">x</span>
+ <span class="pos arrow enter delay2" style="left:591px;top:550px" aria-hidden="true">→</span>
+ <span class="pos math blue enter delay2" style="left:814px;top:514px;font-size:105px">G<sub>θ</sub></span>
+ <span class="pos arrow enter delay2" style="left:1073px;top:550px" aria-hidden="true">→</span>
+ <span class="pos math enter delay2" style="left:1283px;top:519px;font-size:100px">ŷ</span>
+ <p class="pos label quiet enter delay2" style="left:280px;top:660px;width:290px;text-align:center" data-edit data-edit-id="distill-new-case">New case</p>
+ <p class="pos label quiet enter delay2" style="left:740px;top:660px;width:290px;text-align:center" data-edit data-edit-id="distill-reuse">Reuse the weights</p>
+ <p class="pos label enter delay2" style="left:1145px;top:660px;width:350px;text-align:center" data-edit data-edit-id="distill-mesh-free-prediction">Fast, mesh-free inference</p>
+</section>
+
+<section class="slide" data-title="Today: narrow surrogates" data-chapter="The inference engine">
+ <h2 class="title enter" data-edit data-edit-id="narrow-surrogates-title">Today: <em>narrow surrogates</em></h2>
+ <p class="pos label quiet enter" style="left:180px;top:228px;width:505px;text-align:center" data-edit data-edit-id="vehicle-train-boundary-label">Training distribution</p>
+ <p class="pos label quiet enter" style="left:970px;top:228px;width:440px;text-align:center" data-edit data-edit-id="vehicle-deploy-label">Deployment</p>
+ <svg class="pos enter delay" style="inset:0;width:1600px;height:900px" viewBox="0 0 1600 900" role="img" aria-label="Three car variations inside a training-distribution boundary; a broken transfer arrow with a red cross leads to a motorcycle outside that boundary">
+<rect x="175" y="276" width="515" height="418" rx="18" fill="none" stroke="#3c4b52" stroke-width="2" stroke-dasharray="7 9"/>
+<g transform="translate(205 280)" fill="none" stroke="#c0c8cb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M32 82 L35 66 Q36 59 48 56 L99 49 L138 20 Q145 16 157 16 L223 16 Q235 16 245 23 L281 48 L331 53 Q355 56 367 66 L377 85 L374 96 L351 96 Q347 68 323 68 Q299 68 294 96 L119 96 Q114 68 90 68 Q65 68 61 96 L35 96 Z" fill="#0d1113"/>
+ <path d="M109 49 L146 25 L187 25 L187 49 Z M198 25 L222 25 Q230 25 237 30 L264 49 L198 49 Z" stroke="#687b83" stroke-width="2"/>
+ <path d="M191 53 L193 91 M212 66 L226 66 M42 69 L58 69 M357 69 L369 71" stroke="#687b83" stroke-width="2"/>
+ <circle cx="90" cy="96" r="23" fill="#000"/><circle cx="323" cy="96" r="23" fill="#000"/>
+ <circle cx="90" cy="96" r="10" stroke="#687b83" stroke-width="2"/><circle cx="323" cy="96" r="10" stroke="#687b83" stroke-width="2"/>
+ </g><g transform="translate(205 418)" fill="none" stroke="#c0c8cb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M32 82 L35 66 Q36 59 48 56 L99 49 L123 24 Q130 18 144 18 L240 18 Q252 18 263 29 L283 48 L331 53 Q355 56 367 66 L377 85 L374 96 L351 96 Q347 68 323 68 Q299 68 294 96 L119 96 Q114 68 90 68 Q65 68 61 96 L35 96 Z" fill="#0d1113"/>
+ <path d="M111 49 L137 26 L186 26 L186 49 Z M198 26 L238 26 Q246 26 253 33 L268 49 L198 49 Z" stroke="#687b83" stroke-width="2"/>
+ <path d="M191 53 L193 91 M212 66 L226 66 M42 69 L58 69 M357 69 L369 71" stroke="#687b83" stroke-width="2"/>
+ <circle cx="90" cy="96" r="23" fill="#000"/><circle cx="323" cy="96" r="23" fill="#000"/>
+ <circle cx="90" cy="96" r="10" stroke="#687b83" stroke-width="2"/><circle cx="323" cy="96" r="10" stroke="#687b83" stroke-width="2"/>
+ </g><g transform="translate(205 556)" fill="none" stroke="#c0c8cb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M32 82 L35 66 Q36 59 48 56 L99 49 L112 16 Q119 10 132 10 L233 10 Q247 10 260 26 L281 48 L331 53 Q355 56 367 66 L377 85 L374 96 L351 96 Q347 68 323 68 Q299 68 294 96 L119 96 Q114 68 90 68 Q65 68 61 96 L35 96 Z" fill="#0d1113"/>
+ <path d="M107 47 L126 20 L186 20 L186 47 Z M198 20 L229 20 Q241 20 251 32 L266 47 L198 47 Z" stroke="#687b83" stroke-width="2"/>
+ <path d="M191 53 L193 91 M212 66 L226 66 M42 69 L58 69 M357 69 L369 71" stroke="#687b83" stroke-width="2"/>
+ <circle cx="90" cy="96" r="23" fill="#000"/><circle cx="323" cy="96" r="23" fill="#000"/>
+ <circle cx="90" cy="96" r="10" stroke="#687b83" stroke-width="2"/><circle cx="323" cy="96" r="10" stroke="#687b83" stroke-width="2"/>
+ </g>
+  <g fill="none" stroke="#52636b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M622 485 L662 485"/>
+   <path d="M721 485 L907 485" stroke-dasharray="7 9"/>
+   <path d="M893 474 L907 485 L893 496"/>
+   <circle cx="690" cy="485" r="25" fill="#000" stroke="none"/>
+   <path d="M678 473 L702 497 M702 473 L678 497" stroke="#c98279" stroke-width="3.5"/>
+  </g>
+  <g transform="translate(960 361) scale(1.08)" fill="none" stroke="#97cbe0" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round">
+   <circle cx="75" cy="177" r="49" fill="#080d10"/><circle cx="335" cy="177" r="49" fill="#080d10"/>
+   <circle cx="75" cy="177" r="33" stroke="#416574" stroke-width="1.8"/><circle cx="335" cy="177" r="33" stroke="#416574" stroke-width="1.8"/>
+   <circle cx="75" cy="177" r="7"/><circle cx="335" cy="177" r="7"/>
+   <path d="M75 177 L154 104 L223 153 L130 179 Z" stroke="#688f9f"/>
+   <path d="M154 104 L139 158 L204 173 L242 111" stroke="#688f9f"/>
+   <path d="M144 111 L117 85 L60 73 L50 82 L95 104 L146 119" fill="#101c22"/>
+   <path d="M116 86 L158 88" stroke-width="5"/>
+   <path d="M158 89 Q178 51 214 59 L258 81 L242 116 L199 121 L166 110 Z" fill="#12242c"/>
+   <path d="M257 80 L285 49 L313 74 L315 97 L281 102 L266 134 L240 169 L200 174 L206 139 L237 112" fill="#0a1419"/>
+   <path d="M277 84 L335 177 M287 83 L341 173"/>
+   <path d="M282 54 L269 31 L248 28 M271 36 L279 18 L291 16"/>
+   <path d="M288 50 L310 51 L320 75 L313 74" fill="#162d38"/>
+   <path d="M303 130 Q336 117 363 140 M38 137 Q70 119 101 132"/>
+   <path d="M138 155 L162 134 L189 137 L199 158 L180 172 L149 169 Z" stroke="#688f9f" fill="#0a1115"/>
+   <path d="M179 174 L118 190 L61 188" stroke="#688f9f" stroke-width="6"/>
+  </g>
+ </svg>
+ <p class="pos quiet enter delay" style="left:160px;top:701px;width:480px;text-align:center;font-size:26px" data-edit data-edit-id="vehicle-train-caption">Variations of a car</p>
+ <p class="pos quiet enter delay2" style="left:950px;top:701px;width:480px;text-align:center;font-size:26px" data-edit data-edit-id="vehicle-deploy-caption">An unseen geometry</p>
+ <p class="pos blue enter delay2" style="left:100px;top:784px;width:1400px;text-align:center;font-size:37px" data-edit data-edit-id="vehicle-transfer-limitation">Accurate on cars ≠ reliable on motorcycles</p>
+</section>
+
+<section class="slide" data-title="A foundation model for the Earth system" data-chapter="Weather">
+ <video preload="none" class="pos contain enter delay" src="assets/weather-animated.mp4" poster="assets/weather-poster.png" aria-label="Original Aurora animated global weather forecast" style="left:725px;top:55px;width:820px;height:820px" muted loop playsinline></video>
+ <h2 class="pos enter" style="left:100px;top:279px;width:660px;font-size:68px;line-height:1.12" data-edit data-edit-id="earth-system-hero-title">A foundation model<br>for the<br><em>Earth system</em></h2>
+ <div class="pos enter delay2" style="left:104px;top:659px"><p style="font-size:35px" data-edit data-edit-id="earth-system-aurora">Aurora</p><p class="label quiet" style="margin-top:14px">Bodnar et al. · Nature, 2025</p></div>
+</section>
+
+<section class="slide" data-title="Pre-training: from next token to next state" data-chapter="Weather">
+ <h2 class="title enter" data-edit data-edit-id="pretraining-next-state-title">Pre-training:<br>from next token to <em>next state</em></h2>
+ <p class="pos label quiet enter delay" style="left:100px;top:298px" data-edit data-edit-id="next-state-llm">LLMs</p>
+ <p class="pos enter delay" style="left:320px;top:289px;font-size:45px" data-edit data-edit-id="next-state-prompt">The sky is</p>
+ <span class="pos arrow enter delay" style="left:606px;top:281px" aria-hidden="true">→</span>
+ <p class="pos enter delay" style="left:761px;top:295px;font-size:36px" data-edit data-edit-id="next-state-llm-transformer">Transformer</p>
+ <span class="pos arrow enter delay" style="left:1100px;top:281px" aria-hidden="true">→</span>
+ <p class="pos blue enter delay" style="left:1285px;top:289px;font-size:45px" data-edit data-edit-id="next-state-token">blue</p>
+ <p class="pos label quiet enter delay" style="left:1250px;top:373px" data-edit data-edit-id="next-state-token-label">Next token</p>
+ <p class="pos label quiet enter delay2" style="left:100px;top:483px" data-edit data-edit-id="next-state-aurora">Aurora</p>
+ <p class="pos math enter delay2" style="left:298px;top:454px;font-size:62px">x<sub>t−Δt</sub>, x<sub>t</sub></p>
+ <span class="pos arrow enter delay2" style="left:606px;top:464px" aria-hidden="true">→</span>
+ <p class="pos enter delay2" style="left:727px;top:454px;width:255px;text-align:center;font-size:34px;line-height:1.2" data-edit data-edit-id="next-state-physical-transformer">3D Swin<br>Transformer</p>
+ <span class="pos arrow enter delay2" style="left:1100px;top:464px" aria-hidden="true">→</span>
+ <p class="pos math blue enter delay2" style="left:1250px;top:452px;font-size:72px">x<sub>t+Δt</sub></p>
+ <p class="pos label quiet enter delay2" style="left:1248px;top:557px" data-edit data-edit-id="next-state-delta">Next state · Δt ahead</p>
+ <img class="figure build" data-reveal="1" src="assets/pptx-image10.png" alt="Aurora architecture: 3D Perceiver encoder, 3D Swin Transformer backbone, and 3D Perceiver decoder" style="left:150px;top:650px;width:1300px;height:165px">
+ <span class="credit">Aurora · Bodnar et al., Nature 2025 · Architecture from the original presentation</span>
+</section>
+
+<section class="slide" data-title="More pretraining data improves forecasts" data-chapter="Weather">
+ <h2 class="title enter" data-edit data-edit-id="scaling-data-takeaway">More pretraining data,<br><em>better forecasts</em></h2>
+ <div class="pos enter delay" style="left:80px;top:282.359px;width:1440px;height:513.281px">
+  <img src="assets/pptx-image12.png" alt="Original data ablation: ERA5 only, then added climate simulations, then the full HRES/GFS mixture; RMSE relative to ERA5-only training" style="display:block;width:100%;height:100%">
+  <div class="build-exit" data-exit="1" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"><span style="position:absolute;left:179.297px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:250.312px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:317.812px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:389.531px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:575.859px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:641.250px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:704.531px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:769.922px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:833.906px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:900.000px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:963.984px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1028.672px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1094.062px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1159.453px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:1222.031px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1288.125px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1352.109px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:213.090px;top:399.120px;width:1085.385px;height:41.197px;background:#000"></span></div><div class="build-exit" data-exit="2" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none"><span style="position:absolute;left:190.547px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:261.562px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:328.359px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:401.484px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:587.109px;top:82.969px;width:11.953px;height:155.391px;background:#000"></span><span style="position:absolute;left:651.797px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:715.781px;top:82.969px;width:11.953px;height:155.391px;background:#000"></span><span style="position:absolute;left:780.469px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:845.859px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:910.547px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:975.234px;top:82.969px;width:11.953px;height:155.391px;background:#000"></span><span style="position:absolute;left:1039.922px;top:82.969px;width:10.547px;height:155.391px;background:#000"></span><span style="position:absolute;left:1104.609px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1169.297px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1233.281px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1298.672px;top:82.969px;width:11.250px;height:155.391px;background:#000"></span><span style="position:absolute;left:1362.656px;top:82.969px;width:11.953px;height:155.391px;background:#000"></span><span style="position:absolute;left:223.854px;top:448.120px;width:1085.385px;height:41.197px;background:#000"></span></div>
+ </div>
+ <span class="credit">Original data ablation · RMSE relative to ERA5-only training; lower is better · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Larger pretrained models improve forecast quality" data-chapter="Weather">
+ <h2 class="title enter" data-edit data-edit-id="scaling-model-takeaway">Larger pretrained models<br><em>improve forecast quality</em></h2>
+ <img class="figure enter delay" src="assets/model-scaling.png" alt="Aurora models from 113 million to 1.3 billion parameters: HRES validation loss versus GPU hours, training tokens, and parameter count" style="left:85px;top:315px;width:1430px;height:358px">
+ <p class="pos enter delay2" style="left:100px;top:745px;font-size:31px" data-edit data-edit-id="scaling-model-range">113 million → 1.3 billion parameters</p>
+ <span class="credit">Original model-scaling study · Lower validation loss is better · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="One foundation. Four forecasts." data-chapter="Weather">
+ <h2 class="title enter" data-edit data-edit-id="21">One foundation.<br><em>Four forecasts.</em></h2>
+ <div class="pos enter delay" style="left:80px;right:80px;top:334px;display:grid;grid-template-columns:1fr 1fr 440px 1fr;gap:22px;align-items:start">
+  <div style="text-align:center"><video preload="none" src="assets/air-quality-animated.mp4" poster="assets/air-quality-poster.png" aria-label="Atmospheric chemistry field on Earth" style="width:100%;height:300px;object-fit:contain" muted loop playsinline></video><p class="label" style="margin-top:25px">Air quality</p></div>
+  <div style="text-align:center"><video preload="none" src="assets/ocean-waves-animated.mp4" poster="assets/ocean-waves-poster.png" aria-label="Ocean wave field on Earth" style="width:100%;height:300px;object-fit:contain" muted loop playsinline></video><p class="label" style="margin-top:25px">Ocean waves</p></div>
+  <div style="text-align:center"><div style="height:300px;position:relative;overflow:hidden"><video preload="none" src="assets/cyclone-track-animated.mp4" poster="assets/cyclone-track-poster.png" aria-label="Tropical cyclone forecast tracks" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;height:440px;object-fit:contain" muted loop playsinline></video></div><p class="label" style="margin-top:25px">Cyclones</p></div>
+  <div style="text-align:center"><video preload="none" src="assets/weather-animated.mp4" poster="assets/weather-poster.png" aria-label="High resolution weather prediction on Earth" style="width:100%;height:300px;object-fit:contain" muted loop playsinline></video><p class="label" style="margin-top:25px">Weather</p></div>
+ </div><span class="credit">Separate task-specific fine-tuning from a shared pretrained model · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Air quality couples physics and chemistry" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="chemistry-intro-title">Air quality couples<br><em>physics and chemistry</em></h2>
+ <p class="pos blue enter delay" style="left:100px;top:252px;font-size:25px" data-edit data-edit-id="chemistry-pretraining">Physics from pre-training</p>
+ <p class="pos enter delay" style="left:970px;top:252px;font-size:25px;color:#d5b892" data-edit data-edit-id="chemistry-posttraining">Chemistry via post-training</p>
+ <div class="pos enter delay" style="left:100px;top:293px;width:785px;height:1px;background:#97cbe066"></div>
+ <div class="pos enter delay" style="left:970px;top:293px;width:530px;height:1px;background:#d5b89266"></div>
+ <svg class="pos enter delay" style="left:100px;top:310px;width:1400px;height:340px" viewBox="0 0 1400 340" role="img" aria-label="Pre-training supplies atmospheric physics; post-training adds air-quality prediction. Pollutants move and disperse under wind and mixing; reactions change their composition, with rates controlled by temperature and sunlight">
+  <g><circle cx="95" cy="165" r="10" fill="#97cbe0"/>
+<circle cx="125" cy="150" r="10" fill="#97cbe0"/>
+<circle cx="155" cy="170" r="10" fill="#97cbe0"/>
+<circle cx="190" cy="150" r="10" fill="#97cbe0"/>
+<circle cx="105" cy="198" r="10" fill="#97cbe0"/>
+<circle cx="138" cy="188" r="10" fill="#97cbe0"/>
+<circle cx="175" cy="200" r="10" fill="#97cbe0"/>
+<circle cx="207" cy="188" r="10" fill="#97cbe0"/>
+<circle cx="120" cy="228" r="10" fill="#97cbe0"/>
+<circle cx="153" cy="220" r="10" fill="#97cbe0"/>
+<circle cx="187" cy="233" r="10" fill="#97cbe0"/>
+<circle cx="222" cy="217" r="10" fill="#97cbe0"/></g>
+  <path d="M278 193 H427 M415 183 L427 193 L415 203" fill="none" stroke="#97cbe0" stroke-width="2.5"/>
+  <text x="350" y="145" text-anchor="middle" fill="#97cbe0" font-family="Arial,Helvetica,sans-serif" font-size="25">Wind + mixing</text>
+  <g><circle cx="510" cy="115" r="10" fill="#97cbe0"/>
+<circle cx="595" cy="98" r="10" fill="#97cbe0"/>
+<circle cx="675" cy="132" r="10" fill="#97cbe0"/>
+<circle cx="768" cy="105" r="10" fill="#97cbe0"/>
+<circle cx="545" cy="185" r="10" fill="#97cbe0"/>
+<circle cx="630" cy="175" r="10" fill="#97cbe0"/>
+<circle cx="725" cy="205" r="10" fill="#97cbe0"/>
+<circle cx="805" cy="185" r="10" fill="#97cbe0"/>
+<circle cx="508" cy="266" r="10" fill="#97cbe0"/>
+<circle cx="600" cy="252" r="10" fill="#97cbe0"/>
+<circle cx="690" cy="277" r="10" fill="#97cbe0"/>
+<circle cx="785" cy="262" r="10" fill="#97cbe0"/></g>
+  <path d="M850 193 H1043 M1031 183 L1043 193 L1031 203" fill="none" stroke="#d5b892" stroke-width="2.5"/>
+  <text x="948" y="246" text-anchor="middle" fill="#d5b892" font-family="Arial,Helvetica,sans-serif" font-size="25">Reactions</text>
+  <text x="948" y="51" text-anchor="middle" fill="#b5bdc1" font-family="Arial,Helvetica,sans-serif" font-size="24">Temperature + sunlight</text>
+  <path d="M948 78 V158 M940 148 L948 158 L956 148" fill="none" stroke="#7f898e" stroke-width="2"/>
+  <g><circle cx="1090" cy="115" r="10" fill="#97cbe0"/>
+<circle cx="1175" cy="98" r="10" fill="#d5b892"/>
+<circle cx="1255" cy="132" r="10" fill="#d5b892"/>
+<circle cx="1348" cy="105" r="10" fill="#97cbe0"/>
+<circle cx="1125" cy="185" r="10" fill="#d5b892"/>
+<circle cx="1210" cy="175" r="10" fill="#d5b892"/>
+<circle cx="1305" cy="205" r="10" fill="#97cbe0"/>
+<circle cx="1385" cy="185" r="10" fill="#d5b892"/>
+<circle cx="1088" cy="266" r="10" fill="#d5b892"/>
+<circle cx="1180" cy="252" r="10" fill="#97cbe0"/>
+<circle cx="1270" cy="277" r="10" fill="#d5b892"/>
+<circle cx="1365" cy="262" r="10" fill="#d5b892"/></g>
+ </svg>
+ <p class="pos label quiet enter delay2" style="left:100px;top:635px;width:325px;text-align:center" data-edit data-edit-id="chemistry-diagram-emitted">Emitted pollutants</p>
+ <p class="pos label quiet enter delay2" style="left:587px;top:635px;width:350px;text-align:center" data-edit data-edit-id="chemistry-diagram-transport">Moved and dispersed</p>
+ <p class="pos label quiet enter delay2" style="left:1160px;top:635px;width:340px;text-align:center" data-edit data-edit-id="chemistry-diagram-transformed">Changed composition</p>
+ <p class="pos math enter delay2" style="left:100px;top:740px;width:1400px;text-align:center;font-size:47px">∂c<sub>i</sub>/∂t = <span style="color:#97cbe0">𝒯<sub>i</sub>(c; u, K)</span> + <span style="color:#d5b892">ℛ<sub>i</sub>(c; T, J)</span></p>
+ <span class="credit">Aurora, Nature 2025 · Schematic processes; learned jointly after adaptation · Equation omits emissions and removal</span>
+</section>
+
+<section class="slide" data-title="Capturing the day–night cycle" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="air-diurnal-title">Capturing the <em>day–night cycle</em></h2>
+ <p class="pos quiet enter" style="left:100px;top:166px;font-size:25px" data-edit data-edit-id="air-diurnal-mechanism">Sunlight breaks down NO₂. At night, this loss switches off.</p>
+ <div class="pos" style="left:130px;top:220px;width:1240px;height:611.733px">
+  <img src="assets/air-quality-fields.png" alt="Aurora and ground truth total-column nitrogen dioxide at 12 and 24 hours, with original units" style="width:100%;height:100%">
+  <div class="build-exit" data-exit="1" aria-hidden="true" style="position:absolute;left:0;top:51.508px;width:1182.769px;height:263.262px;background:black"></div>
+ </div>
+ <span class="credit">Original slide 12 · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Air quality vs CAMS" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="r4-air-benchmark">Air quality vs CAMS</h2>
+ <p class="pos quiet enter" style="left:100px;top:165px;font-size:25px" data-edit data-edit-id="cams-plain-description">CAMS: Europe’s air-pollution forecasting system</p>
+ <p class="pos quiet enter" style="left:100px;top:206px;font-size:23px" data-edit data-edit-id="cams-baseline">Baseline: global physics + chemistry forecast</p>
+ <p class="pos blue enter" style="right:100px;top:206px;font-size:23px" data-edit data-edit-id="cams-reading">Below zero → Aurora has lower error</p>
+ <div class="pos" style="left:100px;top:252px;width:1400px;height:339.063px">
+  <img src="assets/pptx-image21.png" alt="Air-quality RMSE relative to CAMS, across pollutants, levels and lead times" style="width:100%;height:100%">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:693.819px;top:50.087px;width:12.120px;height:216.956px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:565.590px;top:50.087px;width:12.120px;height:216.956px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:435.274px;top:50.087px;width:12.120px;height:216.956px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:302.674px;top:50.087px;width:12.120px;height:216.956px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:170.074px;top:50.087px;width:12.120px;height:216.956px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:902.654px;top:52.694px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1008.582px;top:52.694px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1111.489px;top:52.694px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1223.095px;top:52.694px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1326.932px;top:52.694px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:940.080px;top:154.215px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1118.406px;top:154.215px;width:12.120px;height:23.987px">
+  <img class="pos build" data-reveal="1" src="assets/pptx-image24.png" alt="Three-day lead-time highlight" style="left:1293.406px;top:154.215px;width:12.120px;height:23.987px">
+ </div>
+ <img class="figure build" data-reveal="2" src="assets/pptx-image22.png" alt="Ranked Aurora versus CAMS RMSE at three days lead time" style="left:220px;top:600px;width:1160px;height:232.226px">
+ <span class="credit">RMSE = root-mean-square forecast error · Compared across pollutants, levels and lead times · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="The Iraq sandstorm" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="iraq-sand-storm-title">Iraq’s severe <em>sand storm</em></h2>
+ <p class="pos quiet enter" style="left:100px;top:175px;font-size:26px" data-edit data-edit-id="iraq-context-date">13 June 2022 · Aurora captures the dust plume a day ahead</p>
+ <img class="figure enter delay" src="assets/sandstorm.png" alt="Aurora, CAMS and ground truth for the Iraq sandstorm at 12, 24 and 36 hours" style="left:100px;top:235px;width:1400px;height:580px">
+ <span class="credit">Darker blue = higher airborne-particle concentrations (PM₁₀) · Red box: Iraq evaluation region · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Atmospheric dynamics coupled to wave dynamics" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="wave-intro-coupled-title">Atmospheric dynamics<br>coupled to <em>wave dynamics</em></h2>
+ <svg class="pos enter delay" style="left:100px;top:245px;width:1400px;height:435px" viewBox="0 0 1400 435" role="img" aria-label="Schematic: winds transfer energy into ocean surface waves, which propagate away as swell. Wave-dependent surface roughness feeds back on atmospheric drag. Not a simulated sea state.">
+  <g fill="none" stroke="#d5b892" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+   <path d="M60 95 H490 M476 86 L490 95 L476 104 M135 145 H555 M541 136 L555 145 L541 154"/>
+   <path d="M230 186 L282 254 M269 248 L282 254 L283 240 M360 186 L412 254 M399 248 L412 254 L413 240 M490 186 L542 254 M529 248 L542 254 L543 240" stroke-width="2"/>
+  </g>
+  <path d="M20 308 C40 308 48 295 60 295 S79 321 95 321 S115 289 134 289 S153 328 171 328 S191 280 213 280 S235 336 258 336 S281 276 305 276 S330 339 355 339 S384 277 414 277 S449 339 480 339 S514 278 550 278 S590 338 630 338 S674 278 720 278 S766 338 813 338 S859 278 906 278 S953 338 1000 338 S1047 278 1094 278 S1141 338 1188 338 S1235 278 1282 278 S1330 338 1380 338 L1380 410 L20 410 Z" fill="#97cbe0" fill-opacity=".08"/>
+  <path d="M20 308 C40 308 48 295 60 295 S79 321 95 321 S115 289 134 289 S153 328 171 328 S191 280 213 280 S235 336 258 336 S281 276 305 276 S330 339 355 339 S384 277 414 277 S449 339 480 339 S514 278 550 278 S590 338 630 338 S674 278 720 278 S766 338 813 338 S859 278 906 278 S953 338 1000 338 S1047 278 1094 278 S1141 338 1188 338 S1235 278 1282 278 S1330 338 1380 338" fill="none" stroke="#97cbe0" stroke-width="3.5"/>
+  <path d="M625 270 V85 Q625 60 600 60 H520 M534 51 L520 60 L534 69" fill="none" stroke="#959b9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M880 205 H1280 M1264 195 L1280 205 L1264 215" fill="none" stroke="#97cbe0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+ </svg>
+ <p class="pos enter delay" style="left:160px;top:275px;font-size:31px;color:#d5b892" data-edit data-edit-id="wave-intro-wind">Atmospheric winds</p>
+ <p class="pos label quiet enter delay" style="left:752px;top:335px" data-edit data-edit-id="wave-intro-feedback">Surface roughness<br>changes wind drag</p>
+ <p class="pos label quiet enter delay" style="left:155px;top:430px" data-edit data-edit-id="wave-intro-transfer">Energy transfer</p>
+ <p class="pos enter delay" style="left:980px;top:387px;font-size:31px;color:#97cbe0" data-edit data-edit-id="wave-intro-swell">Swell travels outward</p>
+ <p class="pos enter delay2" style="left:100px;top:734px;font-size:29px;color:#959b9d" data-edit data-edit-id="wave-intro-target-label">Forecast the sea state</p>
+ <p class="pos enter delay2" style="left:665px;top:734px;font-size:34px" data-edit data-edit-id="wave-intro-targets">Height &nbsp;&nbsp; Period &nbsp;&nbsp; Direction</p>
+ <span class="credit">Schematic wind–wave coupling · NOAA National Ocean Service / NDBC</span>
+</section>
+
+<section class="slide" data-title="Capturing extreme ocean waves" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="wave-extremes-title">Capturing <em>extreme ocean waves</em></h2>
+ <p class="pos quiet enter" style="left:100px;top:175px;font-size:26px" data-edit data-edit-id="wave-nanmadol-context">Typhoon Nanmadol · South of Japan · 17 September 2022 · 24 hours ahead</p>
+ <img class="figure enter delay" src="assets/waves-result.png" alt="Aurora wave height and mean wave direction compared with ground truth at a 24-hour forecast horizon" style="left:180px;top:230px;width:1240px;height:585px">
+ <span class="credit">Top: significant wave height · Bottom: mean wave direction · Red box: typhoon region · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Ocean waves vs HRES-WAM" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="r4-wave-benchmark">Ocean waves vs HRES-WAM</h2>
+ <p class="pos quiet enter" style="left:100px;top:175px;font-size:27px" data-edit data-edit-id="hres-wam-explained">HRES-WAM: ECMWF’s high-resolution physics-based ocean-wave model</p>
+ <img class="figure enter delay" src="assets/wave-benchmark.png" alt="Wave-forecast RMSE relative to HRES-WAM across variables and lead times, including the ranked three-day comparison" style="left:80px;top:250px;width:1440px;height:520px">
+ <span class="credit">Below zero → Aurora has lower forecast error · Baseline: European Centre for Medium-Range Weather Forecasts · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Tropical cyclone forecasting" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="r4-cyclones">Tropical cyclone forecasting</h2>
+ <p class="pos blue enter" style="left:100px;top:172px;font-size:32px" data-edit data-edit-id="cyclone-agencies">Outperforms official forecasts from government agencies</p>
+ <img class="figure enter delay" src="assets/cyclone-benchmark.png" alt="Track MAE relative to operational forecasts across three ocean basins" style="left:100px;top:248px;width:605px;height:573px">
+ <video preload="none" class="figure enter delay" src="assets/cyclone-track-animated.mp4" poster="assets/cyclone-track-poster.png" aria-label="Original animated cyclone track: Aurora, IBTrACS and PGTW" style="left:760px;top:230px;width:770px;height:430px" muted loop playsinline></video>
+ <div class="pos enter delay2" style="left:800px;top:680px;width:720px;font-size:26px;line-height:1.45;display:grid;grid-template-columns:96px 1fr;column-gap:14px;row-gap:8px">
+  <span class="blue" data-edit data-edit-id="cyclone-ofcl-code">OFCL</span><span data-edit data-edit-id="cyclone-ofcl-name">US National Hurricane Center</span>
+  <span class="blue" data-edit data-edit-id="cyclone-pgtw-code">PGTW</span><span data-edit data-edit-id="cyclone-pgtw-name">US Joint Typhoon Warning Center</span>
+  <span class="blue" data-edit data-edit-id="cyclone-bom-code">BoM</span><span data-edit data-edit-id="cyclone-bom-name">Australian Bureau of Meteorology</span>
+ </div>
+ <p class="pos quiet enter delay2" style="left:100px;top:824px;font-size:19px" data-edit data-edit-id="cyclone-baseline-key"><strong style="font-weight:700;color:#d6d9da">Bold labels: official agency forecasts.</strong> Other labels: model guidance and statistical baselines.</p>
+ <span class="credit">2022–2023 evaluation · Track MAE; negative values indicate lower error · Aurora, Nature 2025</span>
+</section>
+
+<section class="slide" data-title="Rime ice: the physics" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="rime-physics-title"><em>Rime ice</em></h2>
+ <p class="pos quiet enter" style="left:100px;top:175px;font-size:30px" data-edit data-edit-id="rime-physics-definition">Supercooled droplets freeze on contact.</p>
+ <svg class="pos enter delay" style="left:100px;top:255px;width:1400px;height:335px" viewBox="0 0 1400 335" role="img" aria-label="Conceptual cross-section: wind carries liquid cloud droplets below zero degrees Celsius toward a cold power-line conductor. Droplets strike it and freeze, growing rough rime ice on the windward surface.">
+  <g fill="#9fcade">
+   <circle cx="50" cy="120" r="5"/><circle cx="97" cy="188" r="4"/><circle cx="136" cy="77" r="5"/><circle cx="151" cy="144" r="3"/><circle cx="198" cy="217" r="6"/><circle cx="210" cy="104" r="4"/><circle cx="261" cy="162" r="5"/><circle cx="285" cy="73" r="3"/><circle cx="317" cy="227" r="4"/><circle cx="351" cy="114" r="6"/><circle cx="384" cy="176" r="4"/>
+  </g>
+  <g fill="none" stroke="#344a55" stroke-width="2">
+   <path d="M448 99 H820 Q908 99 947 49 Q968 22 1040 22 H1230"/>
+   <path d="M448 175 H831"/>
+   <path d="M448 251 H820 Q908 251 947 299 Q968 326 1040 326 H1230"/>
+   <path d="M799 167 L813 175 L799 183" stroke="#8fb5c7"/>
+  </g>
+  <g fill="#a9d7eb"><circle cx="521" cy="99" r="4"/><circle cx="646" cy="175" r="5"/><circle cx="724" cy="251" r="4"/><circle cx="841" cy="143" r="5"/><circle cx="898" cy="192" r="4"/></g>
+  <!-- Rough accretion on the windward side; qualitative, not a simulated ice profile. -->
+  <path d="M1047 113 L1027 98 L1015 110 L994 97 L991 120 L965 111 L970 137 L944 140 L955 159 L928 176 L951 191 L943 213 L970 212 L965 237 L993 231 L1001 254 L1018 242 L1036 252 L1050 235 Q1001 226 1001 175 Q1001 130 1047 113Z" fill="#bdd6de" stroke="#e4f0f3" stroke-width="2"/>
+  <circle cx="1057" cy="175" r="54" fill="#292f32" stroke="#a1a9ac" stroke-width="2"/>
+  <g fill="#5a6367" stroke="#899295" stroke-width="1"><circle cx="1057" cy="175" r="15"/><circle cx="1057" cy="145" r="14"/><circle cx="1083" cy="160" r="14"/><circle cx="1083" cy="190" r="14"/><circle cx="1057" cy="205" r="14"/><circle cx="1031" cy="190" r="14"/><circle cx="1031" cy="160" r="14"/></g>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#adb9be">
+   <text x="53" y="294">Liquid water below 0°C</text>
+   <text x="543" y="153" fill="#88a5b2">Wind</text>
+   <text x="1170" y="128">Power line</text>
+   <text x="1170" y="159" font-size="18" fill="#727e84">Cross-section</text>
+   <text x="1170" y="246" fill="#bdd6de">Ice builds up</text>
+  </g>
+  <path d="M1101 144 L1145 126 M1020 240 L1090 267 L1145 244" fill="none" stroke="#617984" stroke-width="1.5"/>
+ </svg>
+ <div class="pos enter delay2" style="left:100px;right:100px;top:640px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:45px">
+  <div><p style="font-size:29px">Local clouds</p><p class="quiet" style="font-size:23px;margin-top:13px">Where is the liquid water?</p></div>
+  <div><p style="font-size:29px">Wind &amp; droplet transport</p><p class="quiet" style="font-size:23px;margin-top:13px">What reaches the line?</p></div>
+  <div><p style="font-size:29px">Freezing &amp; ice growth</p><p class="quiet" style="font-size:23px;margin-top:13px">How much ice accumulates?</p></div>
+ </div>
+ <p class="pos blue enter delay2" style="left:100px;top:778px;font-size:30px" data-edit data-edit-id="rime-physics-challenges">Small-scale clouds. Complex microphysics. Sparse observations.</p>
+ <span class="credit" style="bottom:25px">Conceptual schematic · Ice loading can cause line failures · Bodnar et al. (2025), §3.1</span>
+</section>
+
+<section class="slide" data-title="Post-training for rime ice" data-chapter="Earth-system results">
+ <h2 class="title enter" data-edit data-edit-id="rime-posttraining-title">Post-training for <em>rime ice</em></h2>
+ <p class="pos quiet enter" style="left:100px;top:175px;font-size:28px" data-edit data-edit-id="rime-posttraining-scope">Weather foundation model + Hydro-Québec observations</p>
+ <p class="pos quiet enter" style="left:100px;top:250px;font-size:23px">Power network</p>
+ <svg class="pos enter delay" style="left:65px;top:260px;width:720px;height:527px" viewBox="230 305 800 585" role="img" aria-label="Schematic of selected Hydro-Québec generating stations and their transmission corridor along the St. Lawrence. The Romaine complex is highlighted. Based on Figure 2 of Bodnar et al.; routes simplified, not to scale.">
+  <!-- Geographic arrangement follows the source map; coastline and routes are simplified. -->
+  <path d="M1030 459 L930 454 L858 461 L800 482 L751 511 L706 537 L668 562 L624 598 L581 631 L542 664 L498 704 L459 744 L413 787 L367 817 L324 841 L303 849 L309 858 L339 849 L382 829 L424 799 L468 766 L506 735 L548 704 L591 673 L634 650 L684 634 L727 607 L753 578 L787 563 L822 553 L849 530 L899 521 L947 529 L991 552 L1030 567 Z" fill="#112b37"/>
+  <path d="M1030 459 L930 454 L858 461 L800 482 L751 511 L706 537 L668 562 L624 598 L581 631 L542 664 L498 704 L459 744 L413 787 L367 817 L324 841 L303 849" fill="none" stroke="#294d5d" stroke-width="1.5"/>
+  <g fill="none" stroke="#244553" stroke-width="2.5" stroke-linecap="round">
+   <path d="M858 461 L858 450 L858 428 L847 398 L843 380 L841 350 L833 326"/>
+   <path d="M623 597 L610 566 L600 533 L589 502 L595 471 L597 438 L583 398 L590 372"/>
+   <path d="M430 786 L405 747 L386 708 L382 650 L368 615 L373 577"/>
+  </g>
+  <g fill="none" stroke="#ae9b7b" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+   <path d="M843 380 L838 398 L851 428 L850 449 L791 465 L698 472 L613 534 L541 625 L465 728 L414 780 L322 834"/>
+   <path d="M597 438 L595 478 L598 510 L613 534"/>
+   <path d="M589 502 L582 509 L598 510"/>
+   <path d="M382 650 L386 680 L405 732 L414 780"/>
+  </g>
+  <g fill="#e9e6dc" stroke="#000" stroke-width="2.5">
+   <circle cx="597" cy="438" r="5.5"/><circle cx="589" cy="502" r="5.5"/><circle cx="598" cy="510" r="5.5"/>
+   <circle cx="382" cy="650" r="5.5"/><circle cx="386" cy="680" r="5.5"/><circle cx="322" cy="834" r="5.5"/>
+  </g>
+  <g fill="#a9d7eb" stroke="#000" stroke-width="2.5">
+   <circle cx="843" cy="380" r="7"/><circle cx="847" cy="398" r="7"/><circle cx="858" cy="428" r="7"/><circle cx="858" cy="450" r="7"/>
+  </g>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="21" fill="#c7ced0">
+   <text x="880" y="391" fill="#b4deed">Romaine</text><text x="880" y="418" font-size="17" fill="#8da8b3">1 · 2 · 3 · 4</text>
+   <text x="442" y="422">Manic–Outardes</text>
+   <text x="287" y="689">La Tuque</text>
+   <text x="240" y="876" font-size="19">Beauharnois</text>
+   <text x="687" y="689" fill="#668d9e" font-size="22" font-family="Georgia,serif" font-style="italic" transform="rotate(-33 687 689)">St. Lawrence</text>
+  </g>
+  <g fill="#777f82" font-family="Arial,Helvetica,sans-serif" font-size="17">
+   <circle cx="464" cy="730" r="3"/><text x="485" y="748">Québec</text>
+   <circle cx="330" cy="819" r="3"/><text x="349" y="848">Montréal</text>
+  </g>
+ </svg>
+ <div class="pos row quiet" style="left:100px;top:798px;gap:24px;font-size:17px">
+  <span><span style="display:inline-block;width:7px;height:7px;background:#e9e6dc;border-radius:50%;margin-right:9px"></span>Generating stations</span>
+  <span><span style="display:inline-block;width:22px;height:2px;background:#ae9b7b;vertical-align:middle;margin-right:9px"></span>Transmission</span>
+ </div>
+ <p class="pos quiet enter" style="left:870px;top:250px;font-size:23px">Average precision · higher is better</p>
+ <svg class="pos enter delay" style="left:870px;top:311px;width:620px;height:400px" viewBox="0 0 620 400" role="img" aria-label="Average precision for 24-hour icing at 14 monitoring sites: post-trained AI model 0.72, physics model with hindsight 0.53, climatology 0.37. Bars start at zero and share a scale ending at one.">
+  <g font-family="Arial,Helvetica,sans-serif" font-size="28">
+   <text x="0" y="28" fill="#97cbe0">Post-trained AI model</text>
+   <text x="0" y="145" fill="#d5b892">Physics model with hindsight†</text>
+   <text x="0" y="262" fill="#959b9d">Climatology</text>
+  </g>
+  <rect x="0" y="46" width="374.4" height="34" fill="#97cbe0"/>
+  <rect x="0" y="163" width="275.6" height="34" fill="#d5b892"/>
+  <rect x="0" y="280" width="192.4" height="34" fill="#626b70"/>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="31">
+   <text x="393" y="74" fill="#97cbe0">0.72</text>
+   <text x="294" y="191" fill="#d5b892">0.53</text>
+   <text x="211" y="308" fill="#959b9d">0.37</text>
+  </g>
+  <path d="M0 337 H520 M0 337 V344 M260 337 V344 M520 337 V344" fill="none" stroke="#515d62"/>
+  <g font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#7d898f"><text x="0" y="374">0</text><text x="248" y="374">0.5</text><text x="507" y="374">1.0</text></g>
+ </svg>
+ <p class="pos quiet" style="left:870px;top:719px;font-size:20px">24-hour icing · 14 monitoring sites</p>
+ <p class="pos quiet" style="left:870px;top:778px;font-size:19px;line-height:1.5;width:610px">† Makkonen index from ERA5 reanalysis,<br>not an operational forecast.</p>
+ <span class="credit" style="bottom:25px;font-size:15px">Schematic · selected power facilities, not to scale · Fig. 2</span>
+ <span class="credit" style="left:870px;bottom:25px;font-size:15px">Silurian × Hydro-Québec · Bodnar et al. (2025), Fig. 3a</span>
+</section>
+
+<section class="slide" data-title="Do these models learn the physics?" data-chapter="Learning physics">
+ <h2 class="pos enter" style="left:100px;top:282px;font-size:104px;line-height:1.12;width:1390px" data-edit data-edit-id="physics-section-question-plural">Do these models<br>learn the <em>physics?</em></h2>
+</section>
+
+<section class="slide" data-title="Recovering seasonal temperatures" data-chapter="Learning physics">
+ <h2 class="title enter" data-edit data-edit-id="seasonal-physics-result-title">Recovering seasonal temperatures</h2>
+ <p class="pos enter delay blue" style="left:100px;top:184px;font-size:36px" data-edit data-edit-id="seasonal-result-v2">Aurora · Two-year rollout</p>
+ <p class="pos quiet enter delay" style="left:100px;top:246px;font-size:25px">2,920 consecutive six-hour predictions · Arctic surface temperature</p>
+ <div class="pos enter delay" style="left:340px;top:295px;display:flex;gap:45px;font-size:24px"><span style="color:#12bbd5">— Aurora</span><span style="color:#ececec">– – ERA5 reanalysis</span></div>
+ <div class="pos enter delay2" style="left:100px;top:340px;width:1400px;height:450px;overflow:hidden" role="img" aria-label="Original Aurora panel from Figure 1: Arctic 2-metre temperature over 2021 and 2022. Aurora and ERA5 show two seasonal cycles. Lines are regional means; shaded bands are spatial minimum to maximum. Temperature in kelvin.">
+  <img src="assets/aurora-two-year-rollouts.png" alt="" style="position:absolute;width:4275.6px;height:2007.6px;max-width:none;left:-52.5px;top:-189px;filter:invert(1) hue-rotate(180deg)">
+ </div>
+ <div class="pos quiet enter delay2" style="left:0;right:0;top:785px;font-size:22px">
+  <span style="position:absolute;left:335.2px;transform:translateX(-50%)">Jan 2021</span><span style="position:absolute;left:624px;transform:translateX(-50%)">Jul 2021</span><span style="position:absolute;left:916px;transform:translateX(-50%)">Jan 2022</span><span style="position:absolute;left:1206px;transform:translateX(-50%)">Jul 2022</span><span style="position:absolute;left:1496.5px;transform:translateX(-50%)">Jan 2023</span>
+ </div>
+ <p class="pos quiet" style="left:100px;top:836px;font-size:17px">Lines: regional means · Shading: spatial min–max · Calendar date supplied to the model</p>
+ <span class="credit" style="bottom:16px;font-size:15px">Lehmann et al. (2026), Fig. 1 · Aurora panel; colors adapted for dark background · arXiv:2605.30184</span>
+</section>
+
+<section class="slide" data-title="Textbook simulations" data-chapter="Learning physics">
+ <h2 class="title enter" style="font-size:62px" data-edit data-edit-id="textbook-simulations-title">Textbook simulations</h2>
+ <p class="pos blue enter delay" style="left:100px;top:175px;font-size:30px" data-edit data-edit-id="geostrophic-model-v2">Pangu-Weather · An idealized dynamics test</p>
+ <div class="pos build-exit" data-exit="1" style="inset:0">
+  <p class="pos" style="left:100px;top:229px;font-size:27px" data-edit data-edit-id="geostrophic-stage-0">0 h · Height disturbance; no wind anomaly</p>
+  <div class="pos" style="left:150px;top:285px;width:1300px;height:535.6px;overflow:hidden" role="img" aria-label="Figure 5 panel A: geostrophic adjustment at 0 hours; geopotential height contours and anomalous wind vectors">
+   <img src="assets/pangu-geostrophic-adjustment.png" alt="" style="position:absolute;left:0;top:0.000px;width:1300px;height:2128.803px;max-width:none;filter:invert(1) hue-rotate(180deg)">
+  </div>
+ </div>
+ <div class="pos build build-exit" data-reveal="1" data-exit="2" style="inset:0">
+  <p class="pos" style="left:100px;top:229px;font-size:27px" data-edit data-edit-id="geostrophic-stage-1">1 h · Winds accelerate toward the disturbance</p>
+  <div class="pos" style="left:150px;top:285px;width:1300px;height:535.6px;overflow:hidden" role="img" aria-label="Figure 5 panel B: geostrophic adjustment at 1 hours; geopotential height contours and anomalous wind vectors">
+   <img src="assets/pangu-geostrophic-adjustment.png" alt="" style="position:absolute;left:0;top:-531.149px;width:1300px;height:2128.803px;max-width:none;filter:invert(1) hue-rotate(180deg)">
+  </div>
+ </div>
+ <div class="pos build build-exit" data-reveal="2" data-exit="3" style="inset:0">
+  <p class="pos" style="left:100px;top:229px;font-size:27px" data-edit data-edit-id="geostrophic-stage-2">3 h · Winds turn under the Coriolis effect</p>
+  <div class="pos" style="left:150px;top:285px;width:1300px;height:535.6px;overflow:hidden" role="img" aria-label="Figure 5 panel C: geostrophic adjustment at 3 hours; geopotential height contours and anomalous wind vectors">
+   <img src="assets/pangu-geostrophic-adjustment.png" alt="" style="position:absolute;left:0;top:-1062.298px;width:1300px;height:2128.803px;max-width:none;filter:invert(1) hue-rotate(180deg)">
+  </div>
+ </div>
+ <div class="pos build" data-reveal="3" style="inset:0">
+  <p class="pos" style="left:100px;top:229px;font-size:27px" data-edit data-edit-id="geostrophic-stage-3">6 h · Winds approach balance with the height field</p>
+  <div class="pos" style="left:150px;top:285px;width:1300px;height:535.6px;overflow:hidden" role="img" aria-label="Figure 5 panel D: geostrophic adjustment at 6 hours; geopotential height contours and anomalous wind vectors">
+   <img src="assets/pangu-geostrophic-adjustment.png" alt="" style="position:absolute;left:0;top:-1593.447px;width:1300px;height:2128.803px;max-width:none;filter:invert(1) hue-rotate(180deg)">
+  </div>
+ </div>
+ <p class="pos quiet" style="left:100px;top:828px;font-size:17px">Blue: height anomaly · Green: wind anomaly · Grey: full height field · 500 hPa</p>
+ <span class="credit" style="bottom:16px;font-size:15px">Hakim &amp; Masanam · Fig. 5, arXiv:2309.10867 (2023); published 2024 · CC BY-SA 4.0 · Panels isolated and colors adapted</span>
+</section>
+
+<section class="slide paper" data-title="So why haven't we solved fluid dynamics yet?" data-chapter="The next frontier">
+ <h2 class="pos enter" style="left:100px;top:255px;font-size:104px;line-height:1.12;width:1390px" data-edit data-edit-id="r3-question">So why haven't we solved<br><em>fluid dynamics</em> yet?</h2>
+</section>
+
+<section class="slide" data-title="Weather and broader CFD" data-chapter="The next frontier">
+ <img class="figure enter" src="assets/forecast-earth.png" alt="Earth: the common geometry of weather forecasting" style="left:586px;top:60px;width:190px;height:190px">
+ <img class="figure enter" src="assets/geometries.png" alt="A wing, turbine and pipe manifold illustrate the diversity of engineering geometries" style="left:989.5px;top:41px;width:475px;height:228px">
+ <div class="pos enter delay" style="left:100px;right:100px;top:275px">
+ <table class="comparison" aria-label="Weather versus broader computational fluid dynamics" style="width:100%;border-collapse:collapse;text-align:left;table-layout:fixed">
+  <colgroup><col style="width:22%"><col style="width:39%"><col style="width:39%"></colgroup>
+  <thead><tr><td></td><th scope="col" style="font-size:52px;font-weight:400;letter-spacing:-.04em;text-align:center;padding:0 0 30px" data-edit data-edit-id="r3-weather">Weather</th><th scope="col" style="font-size:52px;font-weight:400;letter-spacing:-.04em;text-align:center;padding:0 0 30px" data-edit data-edit-id="r3-cfd">Broader CFD</th></tr></thead>
+  <tbody>
+   <tr style="border-top:1px solid #354149"><th scope="row" style="font-size:26px;font-weight:400;color:#98a5ac;padding:28px 25px 28px 0">Geometry</th><td style="font-size:34px;text-align:center;padding:28px 12px" data-edit data-edit-id="r3-one-geometry">One geometry</td><td style="font-size:34px;text-align:center;color:#97cbe0;padding:28px 12px" data-edit data-edit-id="r3-many-geometries">Unlimited geometries</td></tr>
+   <tr class="build" data-reveal="1" style="border-top:1px solid #354149"><th scope="row" style="font-size:26px;font-weight:400;color:#98a5ac;padding:28px 25px 28px 0">Meshing</th><td style="font-size:34px;text-align:center;padding:28px 12px" data-edit data-edit-id="cfd-weather-meshing">Established global grids</td><td style="font-size:34px;text-align:center;color:#97cbe0;padding:28px 12px" data-edit data-edit-id="cfd-geometry-meshing">Hard to automate</td></tr>
+   <tr class="build" data-reveal="2" style="border-top:1px solid #354149"><th scope="row" style="font-size:26px;font-weight:400;color:#98a5ac;padding:28px 25px 28px 0">Simulation data</th><td style="font-size:34px;text-align:center;padding:28px 12px" data-edit data-edit-id="r3-rich-synthetic">Extensive archives</td><td style="font-size:34px;text-align:center;color:#97cbe0;padding:28px 12px" data-edit data-edit-id="r3-small-datasets">Small public datasets</td></tr>
+   <tr class="build" data-reveal="3" style="border-top:1px solid #354149"><th scope="row" style="font-size:26px;font-weight:400;color:#98a5ac;padding:28px 25px 28px 0">Measurements</th><td style="font-size:34px;text-align:center;padding:28px 12px" data-edit data-edit-id="r3-rich-observations">Rich observations</td><td style="font-size:34px;text-align:center;color:#97cbe0;padding:28px 12px" data-edit data-edit-id="r3-sparse-experiments">Very little experimental data</td></tr>
+  </tbody>
+ </table>
+ </div>
+ <span class="disclosure">Engineering objects are conceptual illustrations</span>
+</section>
+
+<section class="slide" data-title="Thank you" data-chapter="Closing">
+ <h2 class="pos enter" style="left:100px;top:275px;font-size:132px;line-height:1.06" data-edit data-edit-id="closing-thank-you">Thank you</h2>
+ <div class="pos enter delay" style="left:105px;top:585px"><p style="font-size:40px;line-height:1.2" data-edit data-edit-id="closing-speaker">Cristian Bodnar</p><p class="quiet" style="font-size:27px;margin-top:14px" data-edit data-edit-id="closing-affiliation">Project Prometheus</p><p class="blue" style="font-size:30px;margin-top:30px" data-edit data-edit-id="closing-email">cbodnar@prometheus.ai</p></div>
+</section>
+
+</div></main>
+<div class="progress" id="progress"></div>
+<nav id="toolbar" aria-label="Presentation controls">
+ <div class="tools"><span class="toolbar-name">World models</span><span class="toolbar-section" id="chapter"></span></div>
+ <div class="tools"><button class="tool nav-arrow" id="prev" title="Previous slide" aria-label="Previous slide">←</button><span class="counter" id="counter" aria-live="polite">01 / 25</span><span id="buildCount" aria-live="polite"></span><button class="tool nav-arrow" id="next" title="Next slide" aria-label="Next slide">→</button></div>
+ <div class="tools"><button class="tool" id="overviewBtn">Slides<kbd>G</kbd></button><button class="tool" id="notesBtn">Notes<kbd>N</kbd></button><button class="tool optional" id="editBtn">Edit<kbd>E</kbd></button><button class="tool optional" id="saveBtn" title="Download an offline copy including all videos and current text edits">Save</button><button class="tool optional" id="motionBtn" title="Pause or resume animation (P)">Pause</button><button class="tool" id="fullBtn">Present<kbd>F</kbd></button><button class="tool optional" id="helpBtn" aria-label="Keyboard shortcuts">?</button></div>
+</nav>
+<aside id="notes" hidden aria-label="Speaker notes"><button class="close" id="closeNotes" aria-label="Close notes">×</button><div class="eyebrow" id="notesIndex"></div><h2 id="notesTitle"></h2><div id="notesBody"></div><div class="eyebrow" style="margin-top:26px">Sources &amp; visual credits</div><div id="notesSources"></div></aside>
+<div id="overview" hidden aria-label="Slide overview"><button class="close" id="closeOverview" aria-label="Close slide overview">×</button><h2 class="overview-title">World Models for Fluid Dynamics</h2><div class="thumb-grid" id="thumbGrid"></div></div>
+<div id="help" hidden role="dialog" aria-modal="true" aria-label="Keyboard shortcuts"><div class="help-card"><button class="close" id="closeHelp" aria-label="Close keyboard shortcuts">×</button><h2>Make it your own.</h2><div class="shortcut"><span>Previous / next reveal or slide</span><kbd>← / → or Space</kbd></div><div class="shortcut"><span>Slide overview</span><kbd>G</kbd></div><div class="shortcut"><span>Speaker notes &amp; sources</span><kbd>N</kbd></div><div class="shortcut"><span>Edit slide text</span><kbd>E</kbd></div><div class="shortcut"><span>Fullscreen</span><kbd>F</kbd></div><div class="shortcut"><span>Pause / resume motion</span><kbd>P</kbd></div><div class="shortcut"><span>Close panels</span><kbd>Esc</kbd></div><p class="micro" style="margin-top:24px">Text edits save in this browser. Use Save to download a standalone copy with your edits.</p></div></div>
+<div id="toast" role="status"></div>
+<script>
+const deckNotes = [{"text": ["What would it mean to have a useful world model for fluid dynamics? The ambition is to predict the physical consequences of a geometry and operating conditions before running a new experiment or costly simulation.", "The talk moves from learned visual worlds, through physical laws and neural inference, to weather as a worked example. It ends with the obstacles to broader CFD."], "sources": [{"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "Engineering artwork generated with OpenAI Imagegen for this draft. Conceptual illustrations, not numerical simulations or experimental evidence."}]}, {"text": ["Sora's 2024 research explored generative video as a route to world simulation. Cosmos-Predict1 is a video world-model platform for physical AI. These demonstrations show the versions named on the slide, not a comparison of the latest releases.", "Treat the demos as evidence of visual and temporal modeling. They do not by themselves establish validated engineering predictions. The Sora clip is the original ten-second woolly-mammoth demonstration, played silently on a loop. The Cosmos clip is a generated robot-manipulation example."], "sources": [{"label": "OpenAI · Video generation models as world simulators · February 2024", "url": "https://openai.com/index/video-generation-models-as-world-simulators/"}, {"label": "NVIDIA · Cosmos-Predict1 · 2025", "url": "https://research.nvidia.com/labs/cosmos-lab/cosmos-predict1/"}, {"label": "OpenAI · Original Sora woolly-mammoth video", "url": "https://cdn.openai.com/sora/videos/wooly-mammoth.mp4"}]}, {"text": ["For an engineer, a plausible picture of an aircraft in flight is only the beginning. We need pressure and shear over the surface, and the resulting lift and drag for specified geometry and operating conditions.", "The point is a difference in required outputs, conditioning, and validation. It is not a claim that video models can never learn useful physical representations. This image is conceptual artwork and contains no computed forces."], "sources": [{"label": "Engineering artwork generated with OpenAI Imagegen for this draft. Conceptual illustrations, not numerical simulations or experimental evidence."}, {"label": "NASA · Turbulence-resolving simulations for aircraft certification by analysis", "url": "https://www.nas.nasa.gov/SC21/research/project4.html"}]}, {"text": ["We already have extraordinarily powerful physical world models: conservation laws and constitutive relationships. The slide shows incompressible Navier–Stokes for a Newtonian fluid with constant density and dynamic viscosity: divergence of velocity is zero, and rho times local plus advective acceleration equals the pressure, viscous and body-force terms.", "Here rho is density, bold u is velocity, p is pressure, mu is dynamic viscosity and bold b is body force per unit mass (for example gravitational acceleration). The minus sign on the pressure gradient and the factor mu on the velocity Laplacian correspond to the momentum equation before dividing by density. All terms in that equation are force per unit volume.", "These equations follow from Cauchy momentum using sigma = -p I + mu (grad u + grad u transposed), incompressibility and constant mu. Initial and boundary conditions specify the problem. This is an illustrative incompressible form, not the full compressible, rotating and thermodynamic system used in atmospheric models. Knowing the equations does not make computing their consequences cheap."], "sources": [{"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "MIT · Marine Hydrodynamics, Lecture 4 · Newtonian fluid and Navier–Stokes equations", "url": "https://web.mit.edu/fluids-modules/www/potential_flows/LecturesHTML/lec04/lecture4.html"}]}, {"text": ["The thesis is that numerical simulation is the wrong inference engine when the goal is cheap, repeated predictions across many designs. We reuse the governing equations, but conventional simulation generally performs the case-specific numerical work again: prepare or adapt the discretization, then solve for the fields.", "The upper row is the reusable physical model, F(u) = 0. The lower row is the repeated computation for a new input case x: mesh preparation, numerical updates and the predicted physical output y. The mesh is conceptual artwork, not an actual solver mesh or computed result.", "This is an argument about amortizing computation, not a literal claim that equations are the only reusable objects. Solver software, meshes for compatible geometries, preconditioners, warm starts and reduced models can also be reused. New geometry may require a new or adapted mesh; a changed operating condition can reuse a mesh but still needs a new solve. The slide's repeated workflow concerns new design cases.", "The next slide uses the same two-row structure. Training distills observations and simulations into reusable weights, so inference can replace much of the repeated numerical work with a learned mapping. Whether this is faster and sufficiently accurate must be established on the task."], "sources": [{"label": "NASA · Turbulence-resolving simulations for aircraft certification by analysis", "url": "https://www.nas.nasa.gov/SC21/research/project4.html"}, {"label": "Engineering artwork generated with OpenAI Imagegen for this draft. Conceptual illustrations, not numerical simulations or experimental evidence."}]}, {"text": ["What if we distill knowledge of reality into neural-network weights? Observations and numerical simulations provide training examples of how physical systems behave. Training absorbs reusable structure across those examples into the model.", "At inference time, we evaluate the trained model for a new state, geometry, or set of conditions. This can be much cheaper than running the original numerical solver. A model trained on broad data can also outperform a particular operational simulation system on specified prediction benchmarks, as the following Aurora results demonstrate.", "Fast, mesh-free inference describes prediction without constructing and solving a numerical simulation mesh for each new case. A neural model can still use spatial grids, sampled points or a discretized representation. Speed and accuracy are task-dependent, not guaranteed for every domain. Accuracy depends on the training data, the task and the evaluation reference. Learning from one solver alone does not automatically make a surrogate more accurate than that solver. The schematic distinguishes expensive training from repeated inference. Here θ denotes learned parameters, x is a new input case, and ŷ is the predicted physical output. It shows no computed result."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Engineering artwork generated with OpenAI Imagegen for this draft. Conceptual illustrations, not numerical simulations or experimental evidence."}]}, {"text": ["A common approach in CFD is a task-specific surrogate trained over a limited geometry family and range of operating conditions. Good performance within that support does not establish reliability for a new geometry family, flow regime, or initial-condition distribution.", "The car-to-motorcycle schematic illustrates training on variations within one geometry family and deploying on an unseen family. A dashed enclosure marks training support; the interrupted transfer arrow marks that reliability does not automatically carry beyond that support. The takeaway means that accuracy on cars does not establish reliability on motorcycles, rather than asserting universal failure. It contains no model predictions or measured errors and makes no claim about a specific model failing on motorcycles. This is a qualitative framing of a common limitation, not a universal failure claim or a numerical benchmark. Geometry Matters reports OOD difficulties across the models in its complex-geometry flow benchmark. Huang et al. discuss poor generalization to new initial conditions and accumulated rollout error, while developing constraints that improve both.", "Broader neural operators, physics-informed approaches and foundation models already exist. The next slide introduces Aurora as a concrete example of learning reusable structure across diverse data and adapting across Earth-system tasks; it does not claim that Aurora solves general CFD or guarantees arbitrary OOD transfer."], "sources": [{"label": "Benchmarking scientific machine-learning approaches for flow prediction around complex geometries · Communications Engineering (2025)", "url": "https://www.nature.com/articles/s44172-025-00513-3"}, {"label": "Huang & Greenberg · Geometric and Physical Constraints Synergistically Enhance Neural PDE Surrogates · ICML (2025)", "url": "https://proceedings.mlr.press/v267/huang25j.html"}]}, {"text": ["Weather makes the argument concrete. Aurora is a foundation model for the Earth system, pretrained across heterogeneous atmospheric datasets and adapted to several prediction tasks.", "The introduction uses the original animated global weather forecast recovered from the supplied PowerPoint. It is one example of Aurora’s predictions; the later four-forecast overview introduces the other tasks. Credit for the original Aurora slides also goes to Rich Turner and Paris Perdikaris, as acknowledged in the supplied presentation."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["The analogy is the prediction objective: an autoregressive language model predicts the next token from preceding tokens; Aurora predicts the next physical state, a time interval Δt into the future, from recent states. The language example is illustrative rather than an actual model output, and words do not always correspond one-to-one with tokenizer tokens.", "Aurora uses two consecutive physical states as input, x_(t−Δt) and x_t, and predicts x_(t+Δt). Its standard weather setup advances by six hours; Δt is kept symbolic here. Repeated application produces a forecast trajectory. These are continuous physical fields rather than vocabulary tokens, so the objectives and output representations differ despite the shared autoregressive pattern.", "Both approaches can use transformer architectures. Aurora specifically combines a 3D Perceiver encoder and decoder with a 3D Swin Transformer U-Net backbone. Advance once to reveal the original architecture figure. This is a shared architectural family, not a claim that Aurora uses the same architecture as a language model.", "The training data still matter: ERA5, CMIP6, GFS and other atmospheric sources provide diverse examples of state evolution for the common prediction task. Observations and data assimilation are needed to establish forecast initial conditions."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["This restores the data ablation and its click sequence from slide 9 of the original PowerPoint. Initially only ERA5 bars and the ERA5 legend appear. Advance once to add climate simulator runs, then again to add the full HRES/GFS mixture. The bars and their legend entries reveal together, using masks aligned to the source-image bars, including their antialiased edges. Yellow uses ERA5 alone; blue adds climate simulator runs; pink further adds HRES forecasts, GFS analysis and GFS forecasts. The bars show RMSE relative to the ERA5-only baseline, which is normalized to 100 percent.", "The left panel reports the surface variables 10U, 10V, MSL and 2T. The right panel averages over atmospheric variables at each pressure level. The largest data mixture improves every displayed surface metric and pressure-level average. The intermediate mixture improves most comparisons, but its 2T error is slightly worse than ERA5 alone.", "This experiment adds data sources, changing both the amount and diversity of the data; it does not isolate data volume from source composition or quality. The original truncated percentage axis and complete legend are preserved. Together with the following model-size study, the result supports pretraining larger models on broader datasets."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["The model-scaling study compares pretrained Aurora models with 113 million, 290 million, 660 million, and 1.3 billion parameters. The original plots show HRES validation loss against training compute, training-token count, and parameter count. In the studied setup, larger models reach lower validation loss.", "The figure also separates performance per GPU hour from performance per training token. The data-token axis refers to training exposure, not the controlled addition of dataset sources. The preceding ablation makes the additional-data result explicit.", "Retain the original axes, curves, legend and fitted trend. These are empirical results within the tested range, not a claim that every increase in size guarantees better forecasts or that the fitted trend extrapolates indefinitely."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["One pretrained foundation supports multiple specialist models through task-specific fine-tuning: air quality, ocean waves, cyclone tracking, and high-resolution weather.", "This is the foundation-model claim that matters for the later engineering argument. It is transfer across tasks, not a claim that one unchanged checkpoint produces every output without adaptation. All four animations are the original GIF sequences recovered from the PowerPoint."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["The transfer-learning story is physics from pre-training and chemistry via post-training. Aurora first learns atmospheric dynamics from weather pre-training data, then is adapted to atmospheric-composition prediction. Post-training learns the coupled air-quality task; the labels do not imply frozen physics weights or two separately executed neural solvers. Air quality requires predicting the evolution of chemical species together with the physical atmosphere. The particle diagram shows species being moved and dispersed by winds and mixing, while reactions alter their composition. Blue and tan markers distinguish schematic species; neither the counts nor the colors encode measured concentrations or a particular stoichiometric reaction. The left-to-right layout separates the processes for explanation; transport and reactions act together. The smaller equation underneath separates the concentration tendency into transport/mixing and chemical-reaction terms. Emissions and removal are omitted on the slide to expose this connection; they are essential in a complete model.", "c_i is the concentration of species i and c denotes the vector of species concentrations. The transport operator depends on winds u and mixing parameters K. The reaction operator couples species to one another and depends on atmospheric conditions such as temperature T and photolysis rates J, which depend on sunlight and its attenuation.", "In a simplified advection–diffusion–reaction model, the transport term is −∇·(u c_i) + ∇·(K∇c_i), with an appropriate choice of concentration variable and mixing closure. Operational atmospheric models also account for convection and other physical processes. Physical evolution controls how species move and how quickly reactions proceed; composition can also affect radiation in coupled systems. The slide highlights the first direction without implying that every configuration includes all feedbacks.", "Aurora's air-quality task learns to forecast atmospheric composition jointly with meteorological variables. The following slide shows the nitrogen-dioxide maps, followed by the broader CAMS benchmark."], "sources": [{"label": "ECMWF · IFS Documentation CY49R1, Part VIII: Atmospheric Composition · 2024", "url": "https://www.ecmwf.int/en/elibrary/81630-ifs-documentation-cy49r1-part-viii-atmospheric-composition"}, {"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}]}, {"text": ["The point of this example is capturing the diurnal cycle of atmospheric composition after post-training. Sunlight photolyses NO₂ into NO and an oxygen atom: NO₂ + hν → NO + O. This daytime loss pathway switches off at night. NO can be converted back to NO₂ through reactions with ozone and peroxy radicals, so photolysis is one part of a coupled chemical cycle rather than permanent removal of all nitrogen oxides. Emissions, transport and other reactions also influence the total-column concentration. These maps show total-column nitrogen dioxide at 12 and 24 hours, with Aurora above the reference fields. The displayed noon/midnight labels refer to the source forecast timestamps; local solar time varies across the global maps.", "The original units, color scale, and horizon labels are preserved. The ground-truth fields appear first; advance once to reveal Aurora, following the original PowerPoint build. The next slide supplies the wider quantitative evaluation."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "NASA · Chemistry in the Sunlight", "url": "https://science.nasa.gov/earth/earth-observatory/chemistry-in-the-sunlight/"}]}, {"text": ["CAMS means Copernicus Atmosphere Monitoring Service. The baseline here is its global atmospheric-composition forecasting system, operated by ECMWF, which combines physical and chemical modelling with observations through data assimilation. The scorecards compare Aurora with that forecast across species, pressure levels, and lead times. RMSE means root-mean-square error. Negative relative RMSE means Aurora has lower forecast error, zero means parity, and positive values mean CAMS has lower error. The lower panel ranks the comparisons at three days.", "Negative relative RMSE means Aurora has lower error than the reference. Retain both improvements and regressions: the result is strong across many targets, not uniformly better for every species and level. Original slide 13. Advance once to highlight the three-day lead time, then again to reveal the ranked three-day comparison, following the original PowerPoint click order."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "Copernicus · CAMS global atmospheric composition forecasts", "url": "https://ads.atmosphere.copernicus.eu/datasets/cams-global-atmospheric-composition-forecasts?tab=overview"}]}, {"text": ["This case study concerns the severe sandstorm that hit Iraq on 13 June 2022. The paper places it within a series of regional dust storms associated with more than 5,000 hospitalizations; that total refers to the series, not this individual event. Wind-driven dust emission and transport couple atmospheric dynamics to particulate pollution. Aurora, CAMS, and the reference fields are shown at 12, 24, and 36 hours. PM₁₀ is the mass concentration of airborne particles with aerodynamic diameter up to approximately 10 micrometres; the color scale is in micrograms per cubic metre. Darker blue means more particulate pollution.", "The takeaway is that Aurora captures the dust plume a day in advance, which the paper describes as similar accuracy to CAMS at far lower computational cost. Do not present this individual example as an Aurora error win: the plotted regional RMSE values are 45 versus 18 at 12 hours, 105 versus 76 at 24 hours, and 79 versus 51 at 36 hours, all in micrograms per cubic metre, for Aurora versus CAMS. Use the maps to describe the position and evolution of the plume. This is a case study alongside the aggregate air-quality benchmark, not a replacement for it. Original PDF page 14."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["This setup slide connects atmospheric prediction to the ocean-wave task. Winds transfer energy into surface waves. Wave-dependent sea-surface roughness feeds back on atmospheric wind stress, giving two-way coupling. The return arrow represents this feedback. Wave energy can propagate beyond the generating wind region as swell, so the local sea state depends on both nearby and distant winds and the existing wave field.", "The diagram is conceptual, not a simulated sea state. It separates a wind-forced region and outward swell propagation for explanation; real seas contain overlapping wave systems with many frequencies and directions. The arrow denotes propagation of wave energy rather than bulk transport of water. Tides, tsunamis and storm surge are outside the scope of this surface-wave forecasting example.", "Sea-state forecasts describe statistical properties such as significant wave height, wave period and wave direction, rather than the phase of every individual crest. The following Aurora maps show significant wave height and mean wave direction; the benchmark then evaluates a broader set of wave variables.", "The physical coupling motivates transfer from a model pretrained on atmospheric data. This diagram describes the physical system, not a claim that Aurora explicitly runs a wave solver or enforces these processes at inference time."], "sources": [{"label": "ECMWF · Ocean wave modelling and atmosphere–wave coupling", "url": "https://www.ecmwf.int/en/research/modelling-and-prediction/marine"}, {"label": "NOAA National Ocean Service · Why does the ocean have waves?", "url": "https://oceanservice.noaa.gov/facts/wavesinocean.html"}, {"label": "NOAA NDBC · Glossary of terms for wave information", "url": "https://www.ndbc.noaa.gov/waveobs.shtml"}, {"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}]}, {"text": ["Wave forecasting tests transfer to a different set of physical outputs. This example shows Typhoon Nanmadol south of Japan at 12 UTC on 17 September 2022, near peak intensity. Strong typhoon winds generate extreme surface waves. The maps compare significant wave height and mean wave direction at a 24-hour horizon. In the highlighted region Aurora predicts 10.2 m compared with 11.3 m in the HRES-WAM analysis reference. These are significant wave heights, a sea-state statistic, not the height of the largest individual crest. The point is capturing the extreme wave field and its direction a day ahead, not an exact match to the peak.", "This qualitative comparison is followed by the quantitative benchmark on the next slide. Original PDF page 15."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}]}, {"text": ["HRES-WAM stands for High RESolution WAve Model. It is ECMWF’s physics-based global ocean-wave forecast system, coupled to its atmospheric model. ECMWF is the European Centre for Medium-Range Weather Forecasts. The baseline name refers to the system evaluated in the Aurora paper. The heatmaps show wave-variable RMSE relative to HRES-WAM at 0.25 degrees across lead times. The right-hand plot ranks the comparisons at three days.", "Negative values indicate lower error. Preserve the original scale, the broken axis, and the positive-error tail: there are variables for which Aurora does not improve on the reference. Original PDF page 16."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "ECMWF · High-resolution ocean wave model (HRES-WAM)", "url": "https://www.ecmwf.int/en/forecasts/datasets/ocean-wave-model-high-resolution-15-day-forecast-set-ii-hres-wam"}]}, {"text": ["Aurora outperforms the official tropical-cyclone track forecasts from the government agencies evaluated in the 2022–2023 study. The comparison uses track mean absolute error against IBTrACS reference paths. The paper reports lower error for every evaluated agency and lead time; some individual differences are not statistically significant, as marked in the figure. Agencies include the National Hurricane Center, Joint Typhoon Warning Center, China Meteorological Administration, Taiwan Central Weather Administration, Japan Meteorological Agency, Korea Meteorological Administration and Australian Bureau of Meteorology. The original benchmark also includes component models used in operational forecasting.", "The chart code OFCL means the official US National Hurricane Center forecast. PGTW denotes the US Joint Typhoon Warning Center, and BoM is the Australian Bureau of Meteorology. The other official agency labels are CWA (Taiwan Central Weather Administration), BABJ (China Meteorological Administration), RJTD (Japan Meteorological Agency) and RKSL (Korea Meteorological Administration). All seven official-forecast labels are bold in the source figure. These forecasts combine operational guidance and forecaster expertise.", "The non-bold North Atlantic/East Pacific labels are forecast guidance rather than additional official agency forecasts. Examples: OCD5 is the climatology-and-persistence statistical baseline for track; HWFI is adjusted HWRF guidance; EMXI is adjusted ECMWF guidance; AEMI is the adjusted GFS ensemble mean; FSSE is the Florida State superensemble; HCCA is the HFIP Corrected Consensus Approach. The I-suffixed examples are prior-cycle forecasts adjusted for use in the current forecast cycle. Baseline codes and compositions refer to the evaluated years, not necessarily current operational systems. As the paper caption explains, different columns can contain different matched forecast samples, so the heatmap supports comparison with Aurora within each column, not direct ranking across columns.", "Negative relative MAE indicates lower track error. The figure retains all model labels, basin labels, and lead times. Original slide 17. The original animated track, recovered from the PowerPoint, now accompanies the benchmark. Both the reference trajectory and forecast trajectories are preserved."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "NHC · Forecast verification and baseline definitions", "url": "https://www.nhc.noaa.gov/verification/verify6.shtml"}, {"label": "NCAR · Tropical Cyclone Guidance Project: Global Techlist", "url": "https://verif.rap.ucar.edu/jntweb/hurricanes-beta/repository/techlist/"}, {"label": "WMO / Typhoon Committee · Operational manual and bulletin centre codes", "url": "https://www.typhooncommittee.org/56th/docs/item%207/TCP-23EDITION2024_revised20240216.pdf"}]}, {"text": ["Rime forms when supercooled liquid droplets strike and freeze on a sub-zero surface. Ice accretion increases conductor weight and aerodynamic loading, creating risks of mechanical failure and outages. The paper links a Romaine transmission-line failure around 19 November 2024 to rime ice.", "The paper identifies two major forecasting challenges: kilometre-scale NWP grids smooth out shallow fog and ridge-top cloud, while bulk microphysics can misrepresent the persistence of supercooled liquid water. These are difficulties of current model resolution, parameterization and observations, not a fundamental inability of physics to describe icing.", "The conceptual cross-section shows wind carrying supercooled liquid droplets toward a cold conductor, with rough ice accretion on the windward side. The physics spans local cloud liquid-water content and droplet size, transport and collision efficiency, and heat transfer and freezing during accretion. The drawing is qualitative, not a simulated ice shape."], "sources": [{"label": "Bodnar et al. · A Weather Foundation Model for the Power Grid · §3.1", "url": "https://arxiv.org/abs/2509.25268"}, {"label": "National Weather Service · Freezing fog", "url": "https://www.weather.gov/safety/fog-freezing"}]}, {"text": ["The key step is post-training: the pretrained GFT weather foundation model is adapted using Hydro-Québec observations from 2016–2023, including icing measurements. The blue bar is the post-trained GFT-HQ model; this chart compares it with physical and climatological references, not with an unadapted foundation model. Original Figure 3a evaluates whether rime ice occurs in the next 24 hours at 14 Sygivre sites. Average precision is 0.72 for GFT-HQ (labelled Post-trained AI model), 0.53 for the Makkonen physics model with hindsight and 0.37 for climatology. Average precision summarizes the precision–recall curve; it is not percentage accuracy.", "The Makkonen index uses retrospective ERA5 reanalysis and is explicitly not an operational forecast. The comparison and its qualification stay visible. The slide plots the three exact reported average-precision values on a zero-based scale.", "The schematic is based on the existing Hydro-Québec network in Figure 2 (left) of the paper. It simplifies the coastline and transmission routes, retaining selected generating sites in their approximate geographic arrangement along the St. Lawrence corridor. It is not to scale or an exhaustive network map. Highlighted sites are the Romaine complex. These are generating stations, not the 14 Sygivre icing observation sites. Romaine 3 and 4 are the facilities associated with the November 2024 transmission-line failure discussed in the paper."], "sources": [{"label": "Bodnar et al. · A Weather Foundation Model for the Power Grid · Figure 3a", "url": "https://arxiv.org/abs/2509.25268"}]}, {"text": ["Forecast accuracy raises a deeper question: what physical structure has the model learned? The next two experiments probe different models and different properties: Aurora’s seasonal temperature cycle, then Pangu-Weather’s response to an idealized imbalance. These are complementary pieces of evidence, not a proof of complete physical understanding."], "sources": []}, {"text": ["The question is whether accurate forecasts reflect learned physical dynamics. This result focuses on recovering seasonal temperatures: Aurora closely tracks ERA5’s Arctic seasonal cycle over a continuous two-year rollout initialized on 1 January 2021, with 2,920 six-hour steps.", "The original Aurora panel from Figure 1 is enlarged without changing its curves or scales. The shared date axis is relabelled at the original tick positions. Temperature is in kelvin. Lines show regional means; shading spans spatial minima and maxima, not uncertainty intervals. The original full figure remains bundled in the assets.", "This is evidence of realistic seasonal dynamics, not a forecast of the exact weather two years ahead or proof of complete physical understanding. Calendar time is supplied to Aurora; the paper’s time-embedding experiments show its importance for seasonality. Extreme-event magnitudes and frequencies remain imperfect."], "sources": [{"label": "Lehmann et al. · Can AI Weather Models Predict Beyond Two Weeks? · Figure 1 and Sections 3, 4.3, 6 · CC BY 4.0", "url": "https://arxiv.org/html/2605.30184v2"}]}, {"text": ["Pangu-Weather is tested on an idealized geostrophic-adjustment problem. A localized negative 500-hPa geopotential-height anomaly is added to a winter-mean atmosphere. Initially every other anomaly, including wind, is zero; the background atmosphere is not windless. The authors subtract the model’s climatological one-step drift to maintain a steady background.", "Advance manually through the original Figure 5 panels at 0, 1, 3 and 6 hours using the next control, right arrow or Space. These are discrete snapshots, without interpolated fields. Wind anomalies initially converge toward the low-height region, then turn clockwise under Coriolis effects and approach alignment with the height-anomaly contours. This is qualitative agreement with expected geostrophic adjustment.", "Green arrows show anomalous winds. Blue contours show negative height anomalies every 20 m; grey contours show full height every 60 m. The final panel includes the 10 m/s arrow key. The original figure is preserved; only panel layout and displayed colors are adapted.", "This study concerns Pangu-Weather, not Aurora. It provides a physical plausibility test, without a direct quantitative comparison against an identical numerical-solver experiment."], "sources": [{"label": "Hakim & Masanam · Dynamical Tests of a Deep-Learning Weather Prediction Model · Figure 5 and Sections 2, 3.3 · CC BY-SA 4.0; figure adaptations under the same license", "url": "https://arxiv.org/html/2309.10867v1#S3.SS3"}, {"label": "Published version · Artificial Intelligence for the Earth Systems (2024)", "url": "https://doi.org/10.1175/AIES-D-23-0090.1"}]}, {"text": ["So why haven't we solved fluid dynamics yet? Weather provides a compelling success case; the question is what prevents comparable generality across the wider range of fluid-dynamics problems.", "The next slide contrasts the learning conditions: a common geometry and rich data in weather, versus diverse domains and much thinner shared data coverage across engineering CFD."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "NASA · Turbulence-resolving simulations for aircraft certification by analysis", "url": "https://www.nas.nasa.gov/SC21/research/project4.html"}]}, {"text": ["Geometry is visible from the start. Advance to reveal meshing, simulation data, and measurements in order. Weather predicts on one Earth, with a largely shared physical geometry. Broader CFD spans an effectively unlimited set of geometries, as well as boundary conditions and flow regimes. Weather can reuse established global grids. For broader CFD, robust mesh generation across varied CAD geometries, boundary layers and flow regimes is difficult to automate. Weather still has grid-design and orography challenges; the comparison is about recurring geometry-specific meshing work. This is a qualitative contrast: weather still has different grids, orography, and regional setups.", "Weather is rich in model-generated data and observations, with large simulation and reanalysis archives and established observing systems. Reanalysis combines observations with numerical models; it is not purely synthetic data.", "Across CFD more broadly, public datasets are small relative to the huge design and operating-condition space. Experimental coverage is sparse, especially for complete three-dimensional, time-resolved fields. The comparison concerns shared data coverage, not a claim that every CFD dataset or industrial archive is small."], "sources": [{"label": "Bodnar et al. · A foundation model for the Earth system · Nature 2025", "url": "https://www.nature.com/articles/s41586-025-09005-y"}, {"label": "Source: Cristian Bodnar, World Models for the Physical World · AI+X Zurich, supplied PowerPoint and PDF"}, {"label": "NASA · Turbulence-resolving simulations for aircraft certification by analysis", "url": "https://www.nas.nasa.gov/SC21/research/project4.html"}, {"label": "Engineering artwork generated with OpenAI Imagegen for this draft. Conceptual illustrations, not numerical simulations or experimental evidence."}, {"label": "Geometry Matters: Benchmarking Scientific ML Approaches for Flow Prediction around Complex Geometries", "url": "https://arxiv.org/abs/2501.01453"}]}, {"text": ["Thank the audience and invite questions."], "sources": []}];
+const $=s=>document.querySelector(s),slides=[...document.querySelectorAll('#stage > .slide')];
+let index=0,buildIndex=0,editing=false,paused=matchMedia('(prefers-reduced-motion: reduce)').matches,overviewBuilt=false,toastTimer;
+const storageKey='world-models-fluid-dynamics-v1-edits';let edits={};try{edits=JSON.parse(localStorage.getItem(storageKey)||'{}')}catch{}
+document.querySelectorAll('[data-edit]').forEach((el,i)=>{const key=el.dataset.editId||('r3-'+i);el.dataset.editId=key;if(Object.hasOwn(edits,key))el.innerHTML=edits[key];el.addEventListener('input',()=>{edits[key]=el.innerHTML;try{localStorage.setItem(storageKey,JSON.stringify(edits))}catch{};overviewBuilt=false});el.addEventListener('paste',ev=>{if(!editing)return;ev.preventDefault();const text=ev.clipboardData.getData('text/plain');document.execCommand('insertText',false,text)});});
+function fit(){const v=$('#viewport');const scale=Math.min(v.clientWidth/1600,v.clientHeight/900);$('#stage').style.transform=`scale(${scale})`;if(!$('#overview').hidden)scaleThumbs()}
+let animationSlide=null,animationFrame=0,animationTimer;
+function showAnimationFrame(){
+ const frames=[...animationSlide.querySelectorAll('.animation-frame')];
+ frames.forEach((frame,i)=>{frame.hidden=i!==animationFrame;frame.setAttribute('aria-hidden',String(frame.hidden))});
+}
+function updateAnimation(){
+ clearTimeout(animationTimer);
+ const active=slides[index].hasAttribute('data-animation')?slides[index]:null;
+ if(active!==animationSlide){animationSlide=active;animationFrame=0;if(active)showAnimationFrame()}
+ if(!active||paused||editing||document.hidden||!$('#overview').hidden)return;
+ const frames=[...active.querySelectorAll('.animation-frame')];
+ animationTimer=setTimeout(()=>{animationFrame=(animationFrame+1)%frames.length;showAnimationFrame();updateAnimation()},Number(frames[animationFrame].dataset.duration));
+}
+function updateMedia(){updateAnimation();slides.forEach((slide,i)=>slide.querySelectorAll('video').forEach(v=>{if(i===index&&!paused&&$('#overview').hidden){v.play().catch(()=>{})}else v.pause()}));document.body.classList.toggle('motion-paused',paused);$('#motionBtn').textContent=paused?'Play':'Pause';$('#motionBtn').setAttribute('aria-pressed',String(paused))}
+function go(n,build=0){index=Math.max(0,Math.min(slides.length-1,n));slides.forEach((el,i)=>{el.classList.toggle('active',i===index);el.setAttribute('aria-hidden',String(i!==index));el.inert=i!==index});$('#counter').textContent=`${String(index+1).padStart(2,'0')} / ${slides.length}`;$('#chapter').textContent=slides[index].dataset.chapter;$('#progress').style.width=`${(index+1)/slides.length*100}%`;$('#prev').disabled=index===0;$('#next').disabled=index===slides.length-1;buildIndex=Math.max(0,Math.min(maxBuild(),build));applyBuild();renderNotes();updateMedia();document.querySelectorAll('.thumb').forEach((t,i)=>t.classList.toggle('current',i===index));document.title=`${index+1}. ${slides[index].dataset.title} · World models`}
+function maxBuild(){return Math.max(0,...[...slides[index].querySelectorAll('[data-reveal],[data-exit]')].map(el=>Number(el.dataset.reveal||el.dataset.exit)))}
+function applyBuild(){const slide=slides[index];slide.querySelectorAll('[data-reveal]').forEach(el=>{const shown=Number(el.dataset.reveal)<=buildIndex;el.classList.toggle('shown',shown);el.setAttribute('aria-hidden',String(!shown))});slide.querySelectorAll('[data-exit]').forEach(el=>el.classList.toggle('removed',Number(el.dataset.exit)<=buildIndex));$('#buildCount').textContent=maxBuild()?`Build ${buildIndex+1}/${maxBuild()+1}`:'';history.replaceState(null,'',`#${index+1}${buildIndex?'/'+buildIndex:''}`)}
+function advance(direction){if(direction>0&&buildIndex<maxBuild()){buildIndex++;applyBuild();return}if(direction<0&&buildIndex>0){buildIndex--;applyBuild();return}go(index+direction);if(direction<0){buildIndex=maxBuild();applyBuild()}}
+function fromHash(){const [slide,build]=location.hash.slice(1).split('/').map(Number);go((slide||1)-1,build||0)}
+function renderNotes(){const note=deckNotes[index];$('#notesIndex').textContent=`Slide ${index+1} · ${slides[index].dataset.chapter}`;$('#notesTitle').textContent=slides[index].dataset.title;$('#notesBody').replaceChildren(...note.text.map(text=>{const p=document.createElement('p');p.textContent=text;return p}));$('#notesSources').replaceChildren(...note.sources.map(s=>{const a=document.createElement(s.url?'a':'p');a.textContent=s.label;if(s.url){a.href=s.url;a.target='_blank';a.rel='noopener noreferrer'}else a.className='micro';return a}))}
+function toggleNotes(force){const show=force===undefined?$('#notes').hidden:force;$('#notes').hidden=!show;$('#notesBtn').classList.toggle('on',show);$('#notesBtn').setAttribute('aria-expanded',String(show))}
+function scaleThumbs(){document.querySelectorAll('.thumb-stage').forEach(box=>{box.firstElementChild.style.transform=`scale(${box.clientWidth/1600})`})}
+function toggleOverview(force){const show=force===undefined?$('#overview').hidden:force;if(show&&!overviewBuilt){$('#thumbGrid').replaceChildren(...slides.map((slide,i)=>{const button=document.createElement('button');button.className='thumb';button.setAttribute('aria-label',`Slide ${i+1}: ${slide.dataset.title}`);const frame=document.createElement('div');frame.className='thumb-stage';const clone=slide.cloneNode(true);clone.removeAttribute('inert');clone.removeAttribute('aria-hidden');clone.classList.remove('active');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));clone.querySelectorAll('video').forEach(v=>{v.removeAttribute('autoplay');v.preload='metadata'});frame.append(clone);const caption=document.createElement('div');caption.className='thumb-caption';const num=document.createElement('span');num.className='thumb-num';num.textContent=String(i+1).padStart(2,'0');const title=document.createElement('span');title.textContent=slide.dataset.title;caption.append(num,title);button.append(frame,caption);button.onclick=()=>{toggleOverview(false);go(i)};button.classList.toggle('current',i===index);return button}));overviewBuilt=true}$('#overview').hidden=!show;$('#overviewBtn').classList.toggle('on',show);$('#overviewBtn').setAttribute('aria-expanded',String(show));if(show){toggleNotes(false);requestAnimationFrame(scaleThumbs)}updateMedia()}
+function toast(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3200)}
+function toggleEditing(force){editing=force===undefined?!editing:force;document.body.classList.toggle('editing',editing);$('#editBtn').classList.toggle('on',editing);document.querySelectorAll('#stage [data-edit]').forEach(el=>{el.contentEditable=String(editing);el.spellcheck=editing});updateMedia();if(editing)toast('Click a title or caption to edit. Changes save in this browser.')}
+async function full(){try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{toast('Use your browser’s fullscreen command to present.')}}
+async function save(){
+ const button=$('#saveBtn');button.disabled=true;toast('Preparing the offline presentation…');
+ try{
+  const clone=document.documentElement.cloneNode(true);
+  clone.querySelector('body').classList.remove('editing','fullscreen','motion-paused');
+  clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));
+  clone.querySelector('#thumbGrid').replaceChildren();
+  ['#overview','#notes','#help'].forEach(selector=>clone.querySelector(selector).hidden=true);
+  clone.querySelector('#toast').classList.remove('show');clone.querySelector('#saveBtn').disabled=false;
+  const assets=new Map();
+  clone.querySelectorAll('[src],[poster]').forEach(el=>['src','poster'].forEach(attribute=>{
+   const path=el.getAttribute(attribute);
+   if(path&&path.startsWith('assets/')){
+    if(!assets.has(path))assets.set(path,[]);
+    assets.get(path).push([el,attribute]);
+   }
+  }));
+  await Promise.all([...assets].map(async([path,targets])=>{
+   const response=await fetch(new URL(path,location.href));
+   if(!response.ok)throw new Error(`Could not download ${path}`);
+   const blob=await response.blob();
+   const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)});
+   targets.forEach(([el,attribute])=>el.setAttribute(attribute,data));
+  }));
+  const url=URL.createObjectURL(new Blob(['<!doctype html>\n'+clone.outerHTML],{type:'text/html'}));
+  const a=document.createElement('a');a.href=url;a.download='world-models-for-fluid-dynamics.html';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Saved an offline presentation with your current text.');
+ }catch(error){console.error(error);toast('Download failed. Please check your connection and try again.');}
+ finally{button.disabled=false;}
+}
+$('#prev').onclick=()=>advance(-1);$('#next').onclick=()=>advance(1);$('#notesBtn').onclick=()=>toggleNotes();$('#closeNotes').onclick=()=>toggleNotes(false);$('#overviewBtn').onclick=()=>toggleOverview();$('#closeOverview').onclick=()=>toggleOverview(false);$('#editBtn').onclick=()=>toggleEditing();$('#fullBtn').onclick=full;$('#motionBtn').onclick=()=>{paused=!paused;updateMedia()};$('#saveBtn').onclick=save;$('#helpBtn').onclick=()=>$('#help').hidden=false;$('#closeHelp').onclick=()=>$('#help').hidden=true;
+document.addEventListener('keydown',e=>{if(e.target.closest('[contenteditable="true"]')){if(e.key==='Escape'){e.target.blur();toggleEditing(false)}return}if(e.key==='Escape'){toggleNotes(false);toggleOverview(false);$('#help').hidden=true;if(editing)toggleEditing(false);return}if(!$('#help').hidden)return;if(['ArrowRight','PageDown',' ','ArrowLeft','PageUp','Home','End'].includes(e.key)&&!$('#overview').hidden)return;switch(e.key){case'ArrowRight':case'PageDown':case' ':e.preventDefault();advance(1);break;case'ArrowLeft':case'PageUp':e.preventDefault();advance(-1);break;case'Home':go(0);break;case'End':go(slides.length-1);break;case'n':case'N':toggleNotes();break;case'g':case'G':toggleOverview();break;case'e':case'E':toggleEditing();break;case'f':case'F':full();break;case'p':case'P':paused=!paused;updateMedia();toast(paused?'Motion paused':'Motion resumed');break;case'?':$('#help').hidden=!$('#help').hidden;break;}});
+let touchX;$('#viewport').addEventListener('touchstart',e=>{touchX=e.changedTouches[0].screenX},{passive:true});$('#viewport').addEventListener('touchend',e=>{if(editing||touchX===undefined)return;const d=e.changedTouches[0].screenX-touchX;if(Math.abs(d)>70)advance(d<0?1:-1);touchX=undefined},{passive:true});
+window.addEventListener('resize',fit);document.addEventListener('fullscreenchange',()=>{document.body.classList.toggle('fullscreen',!!document.fullscreenElement);$('#fullBtn').textContent=document.fullscreenElement?'Exit fullscreen':'Present';fit()});document.addEventListener('visibilitychange',()=>{updateAnimation();if(document.hidden)slides.forEach(s=>s.querySelectorAll('video').forEach(v=>v.pause()));else updateMedia()});window.addEventListener('hashchange',fromHash);fromHash();fit();
+</script></body></html>
